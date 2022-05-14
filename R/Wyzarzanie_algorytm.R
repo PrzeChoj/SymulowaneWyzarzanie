@@ -37,18 +37,16 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     acceptance_rate <- lista_wynik[["acceptance_rate"]]
     
     # warunki stopu:
+    stop_condition <- FALSE
+    
     if(acceptance_rate < eps_hard_end){
-      if(show_progress_bar)
-        close(progressBar)
-      return(punkt)
+      stop_condition <- TRUE
     }
     
     if(acceptance_rate < eps_soft_end){
       soft_end_number <- soft_end_number + 1
       if(soft_end_number > n_soft_end){
-        if(show_progress_bar)
-          close(progressBar)
-        return(punkt)
+        stop_condition <- TRUE
       }
     }else{
       soft_end_number <- 0
@@ -57,19 +55,23 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     if(punkt_prev == punkt){
       perm_end_number <- perm_end_number + 1
       if(perm_end_number > n_perm_end){
-        if(show_progress_bar)
-          close(progressBar)
-        return(punkt)
+        stop_condition <- TRUE
       }
     }else{
       perm_end_number <- 0
+    }
+    
+    if(stop_condition){
+      break
     }
   }
   
   if(show_progress_bar)
     close(progressBar)
   
-  warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
+  if(!stop_condition){
+    warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
+  }
   return(punkt)
 }
 
