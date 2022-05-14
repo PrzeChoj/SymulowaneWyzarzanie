@@ -15,11 +15,23 @@ p <- 10
 n <- 20
 
 example_goal_function <- goal_function_maker(p, n)
+example_log_goal_function <- log_goal_function_maker(p, n)
 
 actual_permutation <- as.cycle(as.word(c(2:p, 1)))
 
 example_goal_function(permutations::id)   # to jest malo
 example_goal_function(actual_permutation) # tego szukamy. To jest max funkcji celu
+
+example_log_goal_function(permutations::id)   # to jest malo
+example_log_goal_function(actual_permutation) # tego szukamy. To jest max funkcji celu
+
+example_log_goal_function(runif_transposition(p))
+
+single_symulated_anneling(permutations::id, 1, example_log_goal_function, 100, p)
+symulated_anneling(example_log_goal_function)
+
+
+
 
 
 # zadanie posortowania tablicy
