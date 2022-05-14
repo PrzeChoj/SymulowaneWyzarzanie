@@ -28,8 +28,8 @@ example_log_goal_function(actual_permutation) # tego szukamy. To jest max funkcj
 example_log_goal_function(runif_transposition(p))
 
 single_symulated_anneling(permutations::id, 1, example_log_goal_function, 100, p)
-symulated_anneling(example_log_goal_function)
-
+perm_found <- symulated_anneling(example_log_goal_function, p=p)
+example_log_goal_function(perm_found)
 
 
 

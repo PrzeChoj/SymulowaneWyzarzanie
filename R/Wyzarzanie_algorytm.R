@@ -9,21 +9,65 @@ source("utils.R")
 #' @param p rozmiar rozwazanych permutacji
 #'
 #' @return permutacja ze znalezionym max
-#' 
 symulated_anneling <- function(funkcja, start=permutations::id,
-                               beta=c(1,2,3), number_of_iterations=1000, p=6, eps=0.01){
+                               beta=c(1,2,3), number_of_iterations=100, p=6,
+                               eps_hard_end=0.01,
+                               eps_soft_end=0.05, n_soft_end=5,
+                               n_perm_end=10,
+                               show_progress_bar=TRUE){
   punkt <- start
-  
-  for(b in beta){
-    lista_wynik <- single_symulated_anneling(punkt, b, funkcja,
-                                             number_of_iterations, p)
+  soft_end_number <- 0
+  perm_end_number <- 0
+
+  if(show_progress_bar)
+    progressBar = utils::txtProgressBar(min = 0, max = length(beta),
+                                        initial = 1)
     
+  for(i in 1:length(beta)){
+    b <- beta[i]
+    if(show_progress_bar)
+      utils::setTxtProgressBar(progressBar, i)
+    
+    punkt_prev <- punkt
+    lista_wynik <- single_symulated_anneling(punkt_prev, b, funkcja,
+                                             number_of_iterations, p)
+  
+      
     punkt <- lista_wynik[["permutation_found"]]
     acceptance_rate <- lista_wynik[["acceptance_rate"]]
-    if(acceptance_rate < eps){
+    
+    # warunki stopu:
+    if(acceptance_rate < eps_hard_end){
+      if(show_progress_bar)
+        close(progressBar)
       return(punkt)
     }
+    
+    if(acceptance_rate < eps_soft_end){
+      soft_end_number <- soft_end_number + 1
+      if(soft_end_number > n_soft_end){
+        if(show_progress_bar)
+          close(progressBar)
+        return(punkt)
+      }
+    }else{
+      soft_end_number <- 0
+    }
+    
+    if(punkt_prev == punkt){
+      perm_end_number <- perm_end_number + 1
+      if(perm_end_number > n_perm_end){
+        if(show_progress_bar)
+          close(progressBar)
+        return(punkt)
+      }
+    }else{
+      perm_end_number <- 0
+    }
   }
+  
+  if(show_progress_bar)
+    close(progressBar)
   
   warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
   return(punkt)
