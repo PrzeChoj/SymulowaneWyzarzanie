@@ -1,4 +1,4 @@
-source("utils.R")
+source("R/utils.R")
 
 #' Szuka maximum dla ciagu bet
 #' 
@@ -15,13 +15,14 @@ symulated_anneling <- function(funkcja, start=permutations::id,
                                eps_soft_end=0.05, n_soft_end=5,
                                n_perm_end=10,
                                show_progress_bar=TRUE){
-  punkt <- start
-  soft_end_number <- 0
-  perm_end_number <- 0
-
   if(show_progress_bar)
     progressBar = utils::txtProgressBar(min = 0, max = length(beta),
                                         initial = 1)
+  
+  punkt <- start
+  soft_end_number <- 0
+  perm_end_number <- 0
+  called_function_values <- 0
     
   for(i in 1:length(beta)){
     b <- beta[i]
@@ -35,6 +36,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
       
     punkt <- lista_wynik[["permutation_found"]]
     acceptance_rate <- lista_wynik[["acceptance_rate"]]
+    called_function_values <- called_function_values + lista_wynik[["called_function_values"]]
     
     # warunki stopu:
     stop_condition <- FALSE
@@ -72,11 +74,14 @@ symulated_anneling <- function(funkcja, start=permutations::id,
   if(!stop_condition){
     warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
   }
+  
+  attr(punkt, "called_function_values") <- called_function_values
+  
   return(punkt)
 }
 
 
-#' Szuka maximum dla pojedynczej bety
+#' Szuka maximum dla pojedynczej bety; To jest alg Metropolisa (NIE Metropolisa Hastingsa, bo zadanie jest symetryczne)
 #' 
 #' @param x Te co wyzej
 #' @return lista z 2 rzeczami: `permutation_found`, `acceptance_rate`
@@ -88,6 +93,7 @@ single_symulated_anneling <- function(punkt, b, funkcja,
     X <- list() # lista wybranych permutacji w kolejnych iteracjach
     X[[1]] <- punkt
     funkcja_aktualny <- funkcja(punkt)
+    called_function_values <- 1
     
     U_wylosowane <- runif(number_of_iterations)
 
@@ -96,6 +102,7 @@ single_symulated_anneling <- function(punkt, b, funkcja,
       
       prop_X <- as.cycle(X[[i-1]] * transp)  # proponowana permutacja
       funkcja_propozycja <- funkcja(prop_X)
+      called_function_values <- called_function_values + 1
       
       A <- min(exp(b*(funkcja_propozycja - funkcja_aktualny)),1) # prawdopodobienstwo akceptacji
       
@@ -114,7 +121,8 @@ single_symulated_anneling <- function(punkt, b, funkcja,
     
     acceptance_rate <- l_akcept / (number_of_iterations-1)
     lista_wynik <- list("acceptance_rate" = acceptance_rate,
-                        "permutation_found" = X[[number_of_iterations]])
+                        "permutation_found" = X[[number_of_iterations]],
+                        "called_function_values" = called_function_values)
     
     return(lista_wynik)
 
