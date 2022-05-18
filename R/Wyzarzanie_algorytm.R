@@ -2,10 +2,10 @@ source("R/utils.R")
 
 #' Szuka maximum dla ciagu bet
 #' 
+#' @param funkcja funkcja, ktora chcemy maksymalizowac. Musi przyjmowac pojedyncza permutacje jako argument
 #' @param start w jakiej permutacji zaczynamy
 #' @param beta wektor kolejnych odwrotnosci temperatur
-#' @param funkcja funkcja, ktora chcemy maksymalizowac. Musi przyjmowac pojedyncza permutacje jako argument
-#' @param number_of_iterations liczba iteracji dla kazdej bety
+#' @param number_of_iterations liczba lub wektor długości takiej samej jak beta; liczba iteracji dla kazdej bety
 #' @param p rozmiar rozwazanych permutacji
 #'
 #' @return permutacja ze znalezionym max
@@ -19,6 +19,13 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     progressBar = utils::txtProgressBar(min = 0, max = length(beta),
                                         initial = 1)
   
+  # number_of_iterations bedzie dla kazdej bety oddzielnie
+  if(length(number_of_iterations) == 1){
+    number_of_iterations_for_every_beta <- number_of_iterations * (numeric(length(beta)) + 1)
+  }else{
+    number_of_iterations_for_every_beta <- number_of_iterations
+  }
+  
   punkt <- start
   soft_end_number <- 0
   perm_end_number <- 0
@@ -31,7 +38,8 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     
     punkt_prev <- punkt
     lista_wynik <- single_symulated_anneling(punkt_prev, b, funkcja,
-                                             number_of_iterations, p)
+                                             number_of_iterations_for_every_beta[i],
+                                             p)
   
       
     punkt <- lista_wynik[["permutation_found"]]
@@ -86,13 +94,14 @@ symulated_anneling <- function(funkcja, start=permutations::id,
 #' @param x Te co wyzej
 #' @return lista z 2 rzeczami: `permutation_found`, `acceptance_rate`
 #' 
-single_symulated_anneling <- function(punkt, b, funkcja,
+single_symulated_anneling <- function(punkt_startowy, b, funkcja,
                                       number_of_iterations, p){
     l_akcept <- 0 # liczba zaakceptowanych zmian permutacji
   
     X <- list() # lista wybranych permutacji w kolejnych iteracjach
-    X[[1]] <- punkt
-    funkcja_aktualny <- funkcja(punkt)
+    X[[1]] <- punkt_startowy
+    funkcja_punkt_startowy <- funkcja(punkt_startowy)
+    funkcja_aktualny <- funkcja_punkt_startowy
     called_function_values <- 1
     
     U_wylosowane <- runif(number_of_iterations)
@@ -121,11 +130,11 @@ single_symulated_anneling <- function(punkt, b, funkcja,
     
   # Sprawdzamy czy otrzymana permutacja daje większą wartość niż poprzednia, tylko jeżeli tak jest to akceptujemy nową.
   
-  if(funkcja(X[[number_of_iterations]]) > funkcja(punkt)) {
+  if(funkcja_aktualny > funkcja_punkt_startowy) {
     wynik <- X[[number_of_iterations]]
   }
   else {
-    wynik <- punkt
+    wynik <- punkt_startowy
   }
   
   acceptance_rate <- l_akcept / (number_of_iterations-1)
