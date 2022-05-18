@@ -1,73 +1,105 @@
 source("R/Wyzarzanie_algorytm.R")
 
+
+# Dobrane parametry
 p <- 15
 n <- 20
 
-example_goal_function <- goal_function_maker(p, n)
-example_log_goal_function <- log_goal_function_maker(p, n)
+# Od razu goal function jest juz zlogarytmowana
 
-actual_permutation <- as.cycle(as.word(c(2:p, 1))) # permutacja dla której osi¹gamy maksimum
+example_goal_function <- goal_function_maker(p, n)
+
+actual_permutation <- as.cycle(as.word(c(2:p, 1))) # permutacja dla ktorej osiagamy maksimum
 
 example_goal_function(permutations::id)   # na id
 example_goal_function(runif_transposition(p)) # na losowej
+example_goal_function(actual_permutation) # na kandydacie na max
 
-example_log_goal_function(permutations::id)
-example_log_goal_function(actual_permutation) # tego szukamy. To jest podejrzewany max funkcji celu
-
-# Testy wy¿arzania dla ró¿nych metod sch³adzania.
+# Testy wyzarzania dla roznych metod schladzania.
 
 perm_found <- symulated_anneling(example_log_goal_function, p=p, beta=1:100, number_of_iterations = 100)
-print(paste0("W wyniku symulowanego wy¿arzania otrzymano permutacjê ",
-             perm_found, " dla której wartoœæ logarytmu funkcji celu wynosi ",
+print(paste0("W wyniku symulowanego wyÅ¼arzania otrzymano permutacjÄ™ ",
+             perm_found, " dla ktÃ³rej wartoÅ›Ä‡ logarytmu funkcji celu wynosi ",
              example_log_goal_function(perm_found), "."))
 
 
-# Wyznaczymy œredni¹ wartoœæ przy 10 próbach wy¿arzania dla ka¿dego typu sch³adzania.
+# Wyznaczymy srednia wartosc przy 10 probach wyzarzania dla kazdego typu schladzania.
 
 
-
-wartosc <- numeric()
-permutacje_wynik <- list()
-# Pierwszy typ bet: ci¹g b_n = 1/10 + 2n (zaczynamy z temperatury T = 10) 
+wartosc1 <- numeric()
+permutacje_wynik1 <- list()
+# Pierwszy typ bet: ciÄ…g b_n = 1/10 + 2n (zaczynamy z temperatury T = 10) 
 
 for(i in 1:10) {
   
-  permutacje_wynik[[i]] <- symulated_anneling(example_log_goal_function, p=p, 
+  permutacje_wynik1[[i]] <- symulated_anneling(example_goal_function, p=p, 
                      beta=seq(1/10, 100, 2), number_of_iterations = 100)
   
-  wartosc[i] <- example_log_goal_function(permutacje_wynik[[i]])
+  wartosc1[i] <- example_goal_function(permutacje_wynik1[[i]])
 
 }
 
-mean(wartosc) # -42.90793
+mean(wartosc1) # 2.302884
+max(wartosc1) # 8.335847
 
-# (1,9)(2,4,11,14,7,15,6,13,8,3,12,5,10) daje wartoœæ -33.40569
 
-max_perm <- as.cycle(as.word(c(9,4,12,11,10,13,15,3,1,2,14,5,8,7,6)))
-example_log_goal_function(max_perm)
-# Drugi typ bet: ci¹g b_n = suma(1:n) - zaczynamy z niskiej temperatury
+
 
 wartosc2 <- numeric()
+permutacje_wynik2 <- list()
 
 for(i in 1:10) {
   
-  wartosc2[i] <- example_log_goal_function(symulated_anneling(example_log_goal_function, p=p, 
-                                                             beta=cumsum(1:100), number_of_iterations = 100))
+  permutacje_wynik2[[i]] <- symulated_anneling(example_goal_function, p=p, 
+                                              beta=cumsum(1:100), number_of_iterations = 100)
+  
+  wartosc2[i] <- example_goal_function(permutacje_wynik2[[i]])
   
 }
 
-mean(wartosc2) # -50.28323 - gorzej
+mean(wartosc2) # 3.342569
+max(wartosc2) # 11.63841
 
-
-# Trzeci typ bet: ci¹g b_n = 
+# Trzeci typ bet: ciag b_n = 1/100, 1/90, 1/80, ..., 200 - zeby zaczÄ…ac z wysokiej temperatury
 
 wartosc3 <- numeric()
+permutacje_wynik3 <- list()
 
 for(i in 1:10) {
   
-  wartosc3[i] <- example_log_goal_function(permutacje_wynik[[i]])
+  permutacje_wynik3[[i]] <- symulated_anneling(example_goal_function, p=p, 
+                                               beta=c(1/100,1/90,1/80,1/70,1/60,1/50,1/40,1/30,1/20,1/10,1,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200), 
+                                               number_of_iterations = 100)
+  
+  wartosc3[i] <- example_goal_function(permutacje_wynik3[[i]])
   
 }
 
-mean(wartosc) # 
+mean(wartosc3) # 3.220668
+max(wartosc3) # 19.20786
 
+
+# Wykresy obrazujace proby wyzarzania dla roznych bet
+
+plot(wartosc1, xlab = "10 prÃ³b symulowanego wyÅ¼arzania", ylab = "OsiÄ…gniÄ™ta wartoÅ›Ä‡ funkcji celu",
+     ylim = c(-30,40), font.lab=2, font = 2)
+axis(side=1, at=1:10, labels = TRUE, font = 2)
+
+points(wartosc2, add = TRUE, col = "red", pch = 2)
+points(wartosc3, add = TRUE, col = "blue", pch = 3)
+
+# Wersja liniowa
+
+plot(wartosc1, xlab = "10 prÃ³b symulowanego wyÅ¼arzania", ylab = "OsiÄ…gniÄ™ta wartoÅ›Ä‡ funkcji celu",
+     ylim = c(-30,40), font.lab=2, font = 2, type = "l")
+axis(side=1, at=1:10, labels = TRUE, font = 2)
+
+lines(wartosc2, add = TRUE, col = "red")
+lines(wartosc3, add = TRUE, col = "blue", pch = 3)
+
+# Nie wydaje sie, zeby ktoras ze sprawdzonych dotychczas metod schladzania
+# byla istotnie lepsza od pozostalych
+
+
+# do przetestowania inne dobory bet
+# do przetestowania inny punkt startowy
