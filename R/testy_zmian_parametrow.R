@@ -33,10 +33,10 @@ permutacje_wynik1 <- list()
 for(i in 1:10) {
   
   permutacje_wynik1[[i]] <- symulated_anneling(example_goal_function, p=p, 
-                     beta=seq(1/10, 100, 2), number_of_iterations = 100)
+                                               beta=seq(1/10, 100, 2), number_of_iterations = 100)
   
   wartosc1[i] <- example_goal_function(permutacje_wynik1[[i]])
-
+  
 }
 
 mean(wartosc1) # 2.302884
@@ -51,7 +51,7 @@ permutacje_wynik2 <- list()
 for(i in 1:10) {
   
   permutacje_wynik2[[i]] <- symulated_anneling(example_goal_function, p=p, 
-                                              beta=cumsum(1:100), number_of_iterations = 100)
+                                               beta=cumsum(1:100), number_of_iterations = 100)
   
   wartosc2[i] <- example_goal_function(permutacje_wynik2[[i]])
   
@@ -82,24 +82,25 @@ max(wartosc3) # 19.20786
 # Wykresy obrazujace proby wyzarzania dla roznych bet
 
 plot(wartosc1, xlab = "10 prób symulowanego wyżarzania", ylab = "Osiągnięta wartość funkcji celu",
-     ylim = c(-30,40), font.lab=2, font = 2)
+     ylim = c(-30,40), font.lab=2, font = 2, lwd = 2)
 axis(side=1, at=1:10, labels = TRUE, font = 2)
 
-points(wartosc2, add = TRUE, col = "red", pch = 2)
-points(wartosc3, add = TRUE, col = "blue", pch = 3)
+points(wartosc2, col = "red", pch = 2, lwd = 2)
+points(wartosc3, col = "blue", pch = 3, lwd = 2)
+points(replicate(10,example_goal_function(permutations::id)), col = "green", pch = 9) # startowa
 
 # Wersja liniowa
 
 plot(wartosc1, xlab = "10 prób symulowanego wyżarzania", ylab = "Osiągnięta wartość funkcji celu",
-     ylim = c(-30,40), font.lab=2, font = 2, type = "l")
+     ylim = c(-30,40), font.lab=2, font = 2, type = "l", lwd=2)
 axis(side=1, at=1:10, labels = TRUE, font = 2)
 
-lines(wartosc2, add = TRUE, col = "red")
-lines(wartosc3, add = TRUE, col = "blue", pch = 3)
-
+lines(wartosc2, col = "red", lwd=2)
+lines(wartosc3, col = "blue", pch = 3, lwd=2)
+lines(replicate(10,example_goal_function(permutations::id)), col = "green",lwd = 2) # startowa
 # Nie wydaje sie, zeby ktoras ze sprawdzonych dotychczas metod schladzania
 # byla istotnie lepsza od pozostalych
 
-
+# do dodania legenda
 # do przetestowania inne dobory bet
 # do przetestowania inny punkt startowy
