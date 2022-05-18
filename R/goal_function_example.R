@@ -11,11 +11,10 @@ length(permutations::fixed(perm))  # 5
 
 
 # przyklad z `goal_function_maker`:
-p <- 15
-n <- 20
+p <- 20
+n <- 100
 
 example_goal_function <- goal_function_maker(p, n)
-example_log_goal_function <- log_goal_function_maker(p, n)
 
 actual_permutation <- as.cycle(as.word(c(2:p, 1)))
 
@@ -23,32 +22,26 @@ example_goal_function(permutations::id)   # to jest malo
 example_goal_function(actual_permutation) # tego szukamy. To jest max funkcji celu
 example_goal_function(runif_transposition(p))
 
-example_log_goal_function(permutations::id)   # to jest malo
-example_log_goal_function(actual_permutation) # tego szukamy. To jest max funkcji celu
-
-example_log_goal_function(runif_transposition(p))
 
 # porownanie podstawowego MH i symulowanego wyzarzania:
 number_of_iterations <- 100
-beta <- c(1,2,3,4)
-# beta <- c(1:100)
+beta <- c(1:100)
 
-perm_found <- symulated_anneling(example_log_goal_function, p=p, beta=beta)
-print(paste0("symulated_anneling found value ",
-             example_log_goal_function(perm_found), " with ",
-             attr(perm_found, "called_function_values"),
-             " calls of goal function"))
+perm_found <- symulated_anneling(example_goal_function, p=p, beta=beta)
 
-mh <- MH(U = attr(example_log_goal_function, "U"), n_number = n,
+mh <- MH(U = attr(example_goal_function, "U"), n_number = n,
                     max_iter = attr(perm_found, "called_function_values"),
                     start = permutations::id)
 perm_found_MH <- mh$found_point
 
 print(paste0("Metrop-Hastings found value ",
-             example_log_goal_function(perm_found_MH), " with ",
+             example_goal_function(perm_found_MH), " with ",
              length(mh$points),
              " calls of goal function"))
-
+print(paste0("symulated_anneling found value ",
+             example_goal_function(perm_found), " with ",
+             attr(perm_found, "called_function_values"),
+             " calls of goal function"))
 
 
 
