@@ -119,16 +119,20 @@ single_symulated_anneling <- function(punkt, b, funkcja,
       }
     }
     
-    acceptance_rate <- l_akcept / (number_of_iterations-1)
-    lista_wynik <- list("acceptance_rate" = acceptance_rate,
-                        "permutation_found" = X[[number_of_iterations]],
-                        "called_function_values" = called_function_values)
-    
-    return(lista_wynik)
+  # Sprawdzamy czy otrzymana permutacja daje większą wartość niż poprzednia, tylko jeżeli tak jest to akceptujemy nową.
+  
+  if(funkcja(X[[number_of_iterations]]) > funkcja(punkt)) {
+    wynik <- X[[number_of_iterations]]
+  }
+  else {
+    wynik <- punkt
+  }
+  
+  acceptance_rate <- l_akcept / (number_of_iterations-1)
+  lista_wynik <- list("acceptance_rate" = acceptance_rate,
+                      "permutation_found" = wynik,
+                      "called_function_values" = called_function_values)
+  
+  return(lista_wynik)
 
 }
-
-
-# jeszcze do poprawienia cos z argumentami goal_function - na ten moment chce wszystkie przy wywolywaniu
-# symulated_anneling, a przeciez perm_proposal ma bys ruchome
-#symulated_anneling(log(goal_function(, 2, 100, U1)))
