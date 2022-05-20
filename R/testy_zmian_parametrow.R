@@ -17,10 +17,10 @@ example_goal_function(actual_permutation) # na kandydacie na max
 
 # Testy wyzarzania dla roznych metod schladzania.
 
-perm_found <- symulated_anneling(example_log_goal_function, p=p, beta=1:100, number_of_iterations = 100)
+perm_found <- symulated_anneling(example_goal_function, p=p, beta=1:100, number_of_iterations = 100)
 print(paste0("W wyniku symulowanego wyżarzania otrzymano permutację ",
              perm_found, " dla której wartość logarytmu funkcji celu wynosi ",
-             example_log_goal_function(perm_found), "."))
+             example_goal_function(perm_found), "."))
 
 
 # Wyznaczymy srednia wartosc przy 10 probach wyzarzania dla kazdego typu schladzania.

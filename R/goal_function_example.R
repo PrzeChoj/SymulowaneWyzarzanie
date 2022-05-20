@@ -1,6 +1,6 @@
 #install.packages("permutations")
 #install.packages("devtools")
-#devtools::install_github("PrzeChoj/gips")
+#devtools::install_github("PrzeChoj/gips")  # update 2022.05.20 16:30
 
 source("R/Wyzarzanie_algorytm.R")
 
@@ -27,91 +27,17 @@ example_goal_function(runif_transposition(p))
 number_of_iterations <- 100
 beta <- c(1:100)
 
-perm_found <- symulated_anneling(example_goal_function, p=p, beta=beta)
+sa <- symulated_anneling(example_goal_function, p=p, beta=beta)
+print(sa)
+plot(sa)
+perm_found_SA <- sa[["found_point"]]
 
 mh <- MH(U = attr(example_goal_function, "U"), n_number = n,
-                    max_iter = attr(perm_found, "called_function_values"),
+                    max_iter = length(sa[["goal_function_logvalues"]]),
                     start = permutations::id)
-perm_found_MH <- mh$found_point
-
-print(paste0("Metrop-Hastings found value ",
-             example_goal_function(perm_found_MH), " with ",
-             length(mh$points),
-             " calls of goal function"))
-print(paste0("symulated_anneling found value ",
-             example_goal_function(perm_found), " with ",
-             attr(perm_found, "called_function_values"),
-             " calls of goal function"))
-
-
-
-
-
-
-# zadanie posortowania tablicy
-pomieszane <- c(5,6,7,8) # c(5,2,6.4,3)
-wielkosc_problemu <- length(pomieszane)
-
-permutacja_sortujaca <- as.cycle(as.word(order(pomieszane)))
-permutacja_mieszajaca <- inverse(permutacja_sortujaca)
-
-is.id(permutacja_mieszajaca * permutacja_sortujaca)  # TRUE
-
-
-
-goal_function_sorting <- function(wektor, permutacja){
-  wielkosc_problemu <- length(wektor)
-  wielkosc_problemu_mniejszy <- length(permutations::fixed(permutacja))
-  
-  funkcja_permutacji_org <- as.function.permutation(permutacja)
-  funkcja_permutacji <- function(i){
-    if(i<=wielkosc_problemu_mniejszy)
-      return(funkcja_permutacji_org(i))
-    return(i)
-  }
-  
-  liczba_zlych <- 0
-  for(i in 1:(wielkosc_problemu-1)){
-    for(j in (i+1):wielkosc_problemu){
-      if(wektor[funkcja_permutacji(i)] > wektor[funkcja_permutacji(j)]){
-        liczba_zlych <- liczba_zlych + 1
-      }
-    }
-  }
-  
-  liczba_zlych
-}
-
-goal_function_sorting(pomieszane, permutacja_sortujaca)
-goal_function_sorting(pomieszane, permutacja_mieszajaca)
-(losowa_permutacja <- as.cycle(as.word(sample(wielkosc_problemu))))
-goal_function_sorting(pomieszane, losowa_permutacja)
-
-
-# przeszukanie calej przestrzeni
-posortowane <- c(4,5,6,7)
-for(i in 1:length(permutations::allperms(4))){
-  permutacja <- as.cycle(permutations::allperms(4)[i])
-  wartosc <- goal_function_sorting(posortowane,
-                                   as.cycle(permutations::allperms(4)[i]))
-  print(paste0(permutacja, ", ", wartosc))
-}
-
-
-# przyklad dla wymiaru 100; tak duzej nieda sie przeszukac
-M <- 100
-losowa_permutacja1 <- sample(M)
-losowa_permutacja2 <- as.cycle(as.word(sample(M)))
-goal_function_sorting(losowa_permutacja1, losowa_permutacja2)
-
-
-
-
-
-
-
-
-
+print(mh)
+plot(mh)
+perm_found_MH <- mh[["found_point"]]
 
 
 
