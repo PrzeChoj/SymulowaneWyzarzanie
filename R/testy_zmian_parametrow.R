@@ -60,7 +60,7 @@ for(i in 1:10) {
 mean(wartosc2)
 max(wartosc2)
 
-# Trzeci typ bet: ciag b_n = 1/100, 1/90, 1/80, ..., 200 - zeby zacząac z wysokiej temperatury
+# Trzeci typ bet: ciag b_n = 1/100, 1/90, 1/80, ..., 200 - zeby zaczac z wysokiej temperatury
 
 wartosc3 <- numeric()
 permutacje_wynik3 <- list()
@@ -118,22 +118,43 @@ mean(wartosc5)
 max(wartosc5)
 
 
+
+# Szósty typ bet: ciag b_n = log(n)
+
+wartosc6 <- numeric()
+permutacje_wynik6 <- list()
+
+for(i in 1:10) {
+  
+  permutacje_wynik6[[i]] <- symulated_anneling(example_goal_function, p=p, 
+                                               beta=c(1/10,1/8,1/6,1/4,1/3,1/2,log(2:100)), 
+                                               number_of_iterations = 100)
+  
+  wartosc6[i] <- example_goal_function(permutacje_wynik6[[i]])
+  
+}
+
+mean(wartosc6)
+max(wartosc6)
+
 # Wykresy obrazujace proby wyzarzania dla roznych bet
 
 plot(wartosc1, main = "10 prób symulowanego wyżarzania dla różnych ciągów temperatur" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
      ylim = c(-30,60), font.lab=2, font = 2, type = "b", lwd=2)
 axis(side=1, at=1:10, labels = TRUE, font = 2)
+axis(side=2, at=c(-10,0,10,20,30,40,50,60), labels = TRUE, font = 2)
 
 lines(wartosc2, col = "red", lwd=2, type="b")
 lines(wartosc3, col = "blue", lwd=2, type="b")
 lines(wartosc4, col = "burlywood", lwd = 2, type="b")
 lines(wartosc5, col = "chartreuse1", lwd = 2, type="b")
+lines(wartosc6, col = "coral", lwd = 2, type="b")
 lines(replicate(10,example_goal_function(permutations::id)), col = "green",lwd = 2, type="b") # startowa
 lines(replicate(10,example_goal_function(actual_permutation)), col = "aquamarine3",lwd = 2, type="b") # max
-text(x = 5.5, y = -3, "Permutacja startowa", font = 2)
-text(x = 5.5, y = 44, "Kandydat na max", lwd = 3, font = 2)
-legend(9.24, 63.7, legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5"),
-       col=c("black", "red", "blue", "burlywood", "chartreuse1", "green", "aquamarine3"), 
+text(x = 5.5, y = example_goal_function(permutations::id) - 5, "Permutacja startowa", font = 2)
+text(x = 5.5, y = example_goal_function(actual_permutation) + 5, "Kandydat na max", lwd = 3, font = 2)
+legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "Bety 6"),
+       col=c("black", "red", "blue", "burlywood", "chartreuse1", "coral"), 
        lty = 1, lwd = 2, cex=0.8, text.font = 2)
 
 # Nie wydaje sie, zeby ktoras ze sprawdzonych metod schladzania
@@ -171,6 +192,12 @@ for(i in 1:10) {
                                                beta=c(1/512, 1/256, 1/128, 1/64, 1/32, 1/16, 1/8, 1/4, 1/2, 1, 2 , 4, 8, 16, 32, 64, 128, 256, 512), 
                                                number_of_iterations = 100)
   wartosc5[i] <- example_goal_function(permutacje_wynik5[[i]])
+  
+  permutacje_wynik6[[i]] <- symulated_anneling(example_goal_function,start= perm_start, p=p, 
+                                               beta=c(1/10,1/8,1/6,1/4,1/3,1/2,log(2:100)), 
+                                               number_of_iterations = 100)
+  wartosc6[i] <- example_goal_function(permutacje_wynik6[[i]])
+  
 }
 
 # Wykresy raz jeszcze
@@ -178,17 +205,19 @@ for(i in 1:10) {
 plot(wartosc1, main = "10 prób symulowanego wyżarzania dla różnych ciągów temperatur" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
      ylim = c(-30,60), font.lab=2, font = 2, type = "b", lwd=2)
 axis(side=1, at=1:10, labels = TRUE, font = 2)
+axis(side=2, at=c(-10,0,10,20,30,40,50,60), labels = TRUE, font = 2)
 
 lines(wartosc2, col = "red", lwd=2, type="b")
 lines(wartosc3, col = "blue", lwd=2, type="b")
 lines(wartosc4, col = "burlywood", lwd = 2, type="b")
 lines(wartosc5, col = "chartreuse1", lwd = 2, type="b")
+lines(wartosc6, col = "coral", lwd = 2, type="b")
 lines(replicate(10,example_goal_function(perm_start)), col = "green",lwd = 2, type="b") # startowa
 lines(replicate(10,example_goal_function(actual_permutation)), col = "aquamarine3",lwd = 2, type="b") # max
-text(x = 5.5, y = -18, "Permutacja startowa", font = 2)
-text(x = 5.5, y = 45, "Kandydat na max", lwd = 3, font = 2)
-legend(9.24, 63.7, legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5"),
-       col=c("black", "red", "blue", "burlywood", "chartreuse1", "green", "aquamarine3"), 
-       lty = 1, lwd = 2, cex=0.8, text.font = 2)
+text(x = 5.5, y = example_goal_function(perm_start) - 5, "Permutacja startowa", font = 2)
+text(x = 5.5, y = example_goal_function(actual_permutation) + 5, "Kandydat na max", lwd = 3, font = 2)
+legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "Bety 6"),
+       col=c("black", "red", "blue", "burlywood", "chartreuse1", "coral"), 
+       lty = 1, lwd = 2, cex=0.8, horiz=TRUE,text.font = 2)
 
 # Wciaz ladujemy dosyc daleko od maksimum
