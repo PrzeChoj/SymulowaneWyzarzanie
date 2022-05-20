@@ -125,6 +125,8 @@ symulated_anneling <- function(funkcja, start=permutations::id,
 #' 
 single_symulated_anneling <- function(punkt_startowy, b, funkcja,
                                       number_of_iterations, p){
+  stopifnot(length(b) == 1, is.numeric(b))
+  
   l_akcept <- 0 # liczba zaakceptowanych zmian permutacji
 
   X <- list() # lista wybranych permutacji w kolejnych iteracjach

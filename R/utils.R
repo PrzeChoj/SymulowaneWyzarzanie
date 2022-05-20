@@ -55,8 +55,11 @@ trim_values <- function(values, min_val=NULL, max_val=NULL){
 #' @param values_list list of lists of values of goal_function that were found in the iteration; for a optimization method has to be the same length
 #' @param min_val value that will be considered 0
 #' @param max_val value that will be considered 1
-plot_epdf <- function(values_list, min_val, max_val,
-                      xlog = TRUE, line_colours = "rainbow"){
+plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
+                      line_colours = "rainbow", max_y_scale = 1,
+                      show_legend = FALSE){
+  stopifnot(max_y_scale > 0, max_y_scale <= 1)
+  
   num_of_algorithms <- length(values_list)
   num_of_tries <- sapply(values_list, length)
   num_of_iters <- sapply(1:num_of_algorithms, function(i){
@@ -72,7 +75,7 @@ plot_epdf <- function(values_list, min_val, max_val,
   if(xlog){
     xlim <- c(0, log(xlim[2]))
   }
-  ylim <- c(0, 1)
+  ylim <- c(0, max_y_scale)
   
   graphics::plot.new()
   graphics::plot.window(xlim, ylim)
@@ -104,21 +107,44 @@ plot_epdf <- function(values_list, min_val, max_val,
   graphics::axis(2)
   graphics::box()
   
+  # TODO(legenda jest zla xd)
+  if(show_legend)
+    warning("Legenda jeszcze nie dziala xd")
+  
   invisible(NULL)
 }
 
-#' TODO(niech daje tej samej długości)
-get_list_of_lists_of_log_values_num_of_it <- function(goal_function, p, beta, number_of_iterations, M){
+#' 1. beta jest lista, wtedy testujesz algorytmy z roznymi betami
+#' 2. number_of_iterations jest wektorem, wtedy testujesz algorytmy z roznymi długościami kroków pojedynczych iteracji `single_symulated_anneling`
+get_list_of_lists_of_log_values <- function(goal_function, p, beta, number_of_iterations, M){
   list_of_lists_of_log_values <- list()
+  
+  number_of_loops <- ifelse(is.list(beta),
+                            length(beta), # testujemy różne strategie dla wzrastania beta
+                            length(number_of_iterations)) # testujemy różne strategie liczby krokow w iteracji
+  
+  stopifnot(number_of_loops > 1)
+  
+  progressBar_iterations <- number_of_loops * M
+  
   progressBar <- utils::txtProgressBar(initial = 1, min = 0,
-                                       max = length(number_of_iterations) * M)
-  for(i in 1:length(number_of_iterations)){
+                                       max = progressBar_iterations)
+  
+  for(i in 1:number_of_loops){
     list_of_log_values <- list()
     for(j in 1:M){
       utils::setTxtProgressBar(progressBar, (i-1)*M + j)
       
-      sa <- symulated_anneling(goal_function, p=p, beta=beta,
-                               number_of_iterations = number_of_iterations[i],
+      if(is.list(beta)){
+        beta_i <- beta[[i]]
+        number_of_iterations_i <- number_of_iterations
+      }else{
+        beta_i <- beta
+        number_of_iterations_i <- number_of_iterations[i]
+      }
+      
+      sa <- symulated_anneling(goal_function, p=p, beta=beta_i,
+                               number_of_iterations = number_of_iterations_i,
                                show_progress_bar=FALSE,
                                stopping_criteria=FALSE)
       list_of_log_values[[j]] <- sa[["goal_function_logvalues"]]
