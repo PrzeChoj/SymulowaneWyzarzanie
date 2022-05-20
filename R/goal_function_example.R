@@ -71,6 +71,7 @@ list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_func
 plot_epdf(values_list = list_of_lists_of_log_values,
           min_val = example_goal_function(permutations::id),
           max_val = example_goal_function(actual_permutation),
-          max_y_scale = 1)
+          max_y_scale = 1,
+          legend_text = c("1:4", "log(2:5)", "log(1 + (1:4)/10)"))
 
 

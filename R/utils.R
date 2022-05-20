@@ -57,7 +57,7 @@ trim_values <- function(values, min_val=NULL, max_val=NULL){
 #' @param max_val value that will be considered 1
 plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
                       line_colours = "rainbow", max_y_scale = 1,
-                      show_legend = FALSE){
+                      show_legend = TRUE, legend_text = NULL){
   stopifnot(max_y_scale > 0, max_y_scale <= 1)
   
   num_of_algorithms <- length(values_list)
@@ -73,7 +73,7 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
   
   xlim <- c(1, max(num_of_iters))
   if(xlog){
-    xlim <- c(0, log(xlim[2]))
+    xlim <- c(0, log10(xlim[2]))
   }
   ylim <- c(0, max_y_scale)
   
@@ -90,14 +90,14 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
     
     x_cords <- 1:length(avrage_for_ith_algorithm)
     if(xlog){
-      x_cords <- log(x_cords)
+      x_cords <- log10(x_cords)
     }
     graphics::lines.default(x_cords, avrage_for_ith_algorithm,
                             type = "l", col = line_colours[i])
   }
   
   if(xlog){
-    xlab <- "log of number of function calls"
+    xlab <- "log10 of number of function calls"
   }else{
     xlab <- "number of function calls"
   }
@@ -107,9 +107,15 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
   graphics::axis(2)
   graphics::box()
   
-  # TODO(legenda jest zla xd)
-  if(show_legend)
-    warning("Legenda jeszcze nie dziala xd")
+  if(show_legend){
+    if(is.null(legend_text))
+      legend_text <- paste0("algorytm ", 1:num_of_algorithms)
+    
+    graphics::legend("topleft", inset=.002,
+                     legend = legend_text,
+                     col = line_colours, cex = 0.7,
+                     lwd = 1)
+  }
   
   invisible(NULL)
 }
