@@ -43,4 +43,21 @@ perm_found_MH <- mh[["found_point"]]
 
 
 
+beta <- log(2:100)
+number_of_iterations <- c(10, 100)
+M <- 2
+
+# Uwaga! nie daje jeszcze wektorow takiej samej dlugosci, a potrzebujemy tego
+list_of_lists_of_log_values <- get_list_of_lists_of_log_values_num_of_it(example_goal_function, p, beta, number_of_iterations, M)
+
+list_of_lists_of_log_values[[1]][[2]][7] <- 700
+
+plot_epdf(values_list = list_of_lists_of_log_values, min_val = example_goal_function(permutations::id), max_val = example_goal_function(actual_permutation))
+
+
+
+
+
+
+
 

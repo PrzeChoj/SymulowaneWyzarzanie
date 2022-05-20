@@ -16,7 +16,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
                                n_perm_end=10,
                                show_progress_bar=TRUE){
   if(show_progress_bar)
-    progressBar = utils::txtProgressBar(min = 0, max = length(beta),
+    progressBar <- utils::txtProgressBar(min = 0, max = length(beta),
                                         initial = 1)
   
   # number_of_iterations bedzie dla kazdej bety oddzielnie
