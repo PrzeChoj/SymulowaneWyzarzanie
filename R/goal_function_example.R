@@ -11,7 +11,7 @@ length(permutations::fixed(perm))  # 5
 
 
 # przyklad z `goal_function_maker`:
-p <- 20
+p <- 10
 n <- 100
 
 example_goal_function <- goal_function_maker(p, n)
@@ -25,10 +25,10 @@ example_goal_function(runif_transposition(p))
 
 # porownanie podstawowego MH i symulowanego wyzarzania:
 number_of_iterations <- 100
-beta <- c(1:100)
+beta <- log(c(2:4))
 
 sa <- symulated_anneling(example_goal_function, p=p, beta=beta,
-                         number_of_iterations = 100)
+                         number_of_iterations = number_of_iterations)
 print(sa)
 plot(sa)
 perm_found_SA <- sa[["found_point"]]
@@ -43,16 +43,15 @@ perm_found_MH <- mh[["found_point"]]
 
 
 
-beta <- log(2:100)
-number_of_iterations <- c(10, 100)
-M <- 2
+beta <- log(2:5)
+number_of_iterations <- 10 * 2^(1:4)
+M <- 30
 
-# Uwaga! nie daje jeszcze wektorow takiej samej dlugosci, a potrzebujemy tego
 list_of_lists_of_log_values <- get_list_of_lists_of_log_values_num_of_it(example_goal_function, p, beta, number_of_iterations, M)
 
-list_of_lists_of_log_values[[1]][[2]][7] <- 700
-
-plot_epdf(values_list = list_of_lists_of_log_values, min_val = example_goal_function(permutations::id), max_val = example_goal_function(actual_permutation))
+plot_epdf(values_list = list_of_lists_of_log_values,
+          min_val = example_goal_function(permutations::id),
+          max_val = example_goal_function(actual_permutation))
 
 
 

@@ -119,7 +119,8 @@ get_list_of_lists_of_log_values_num_of_it <- function(goal_function, p, beta, nu
       
       sa <- symulated_anneling(goal_function, p=p, beta=beta,
                                number_of_iterations = number_of_iterations[i],
-                               show_progress_bar=FALSE)
+                               show_progress_bar=FALSE,
+                               stopping_criteria=FALSE)
       list_of_log_values[[j]] <- sa[["goal_function_logvalues"]]
     }
     list_of_lists_of_log_values[[i]] <- list_of_log_values

@@ -14,10 +14,20 @@ symulated_anneling <- function(funkcja, start=permutations::id,
                                eps_hard_end=0.01,
                                eps_soft_end=0.05, n_soft_end=5,
                                n_perm_end=10,
-                               show_progress_bar=TRUE){
+                               show_progress_bar=TRUE,
+                               stopping_criteria=TRUE){
   if(show_progress_bar)
     progressBar <- utils::txtProgressBar(min = 0, max = length(beta),
                                         initial = 1)
+  
+  # wylacz stopping
+  if(!stopping_criteria){
+    eps_hard_end <- 0
+    eps_soft_end <- 0
+    n_soft_end <- Inf
+    n_perm_end <- Inf
+  }
+  
   
   # number_of_iterations bedzie dla kazdej bety oddzielnie
   if(length(number_of_iterations) == 1){
@@ -88,7 +98,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
   if(show_progress_bar)
     close(progressBar)
   
-  if(!stop_condition){
+  if(!stop_condition && stopping_criteria){
     warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
   }
   
