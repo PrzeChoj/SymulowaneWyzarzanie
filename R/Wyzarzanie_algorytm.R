@@ -34,7 +34,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
   
   all_acceptance_rates <- numeric(0)
   points <- list()
-  number_of_iterations_cumsum <- cumsum(number_of_iterations)
+  number_of_iterations_cumsum <- cumsum(number_of_iterations_for_every_beta)
     
   for(i in 1:length(beta)){
     b <- beta[i]
@@ -92,15 +92,14 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     warning("Nie osiagnieto warunku stopu. Nie utknelismy jeszcze w minimum lokalnym. Sprobuj z wieksza beta.")
   }
   
-  acceptance_rate <- mean(all_acceptance_rates * number_of_iterations[1:i])
-  
+  acceptance_rate <- mean(all_acceptance_rates * number_of_iterations_for_every_beta[1:i]) / sum(number_of_iterations_for_every_beta[1:i])
   
   out <- list("acceptance_rate"=acceptance_rate,
               "goal_function_logvalues"=log_values,
               "points"=points,
               "found_point"=punkt,
               "found_point_function_logvalue"=found_point_function_logvalue,
-              "last_point"=points[[number_of_iterations_cumsum[i]]],
+              "last_point"=points[[i]][[number_of_iterations_for_every_beta[i]]],
               "last_point_function_logvalue"=log_values[number_of_iterations_cumsum[i]])
   
   class(out) <- c("gips", "list")

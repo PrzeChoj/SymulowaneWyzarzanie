@@ -27,7 +27,8 @@ example_goal_function(runif_transposition(p))
 number_of_iterations <- 100
 beta <- c(1:100)
 
-sa <- symulated_anneling(example_goal_function, p=p, beta=beta)
+sa <- symulated_anneling(example_goal_function, p=p, beta=beta,
+                         number_of_iterations = 100)
 print(sa)
 plot(sa)
 perm_found_SA <- sa[["found_point"]]
