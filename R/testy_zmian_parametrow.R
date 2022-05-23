@@ -23,6 +23,12 @@ print(paste0("W wyniku symulowanego wyżarzania otrzymano permutację ",
              example_log_goal_function(perm_found), "."))
 
 
+#####################################
+#####################################
+#####################################
+#####################################
+
+
 # Wyznaczymy srednia wartosc przy 10 probach wyzarzania dla kazdego typu schladzania.
 
 # Pierwszy typ bet: ciąg b_n = 1/10 + 2n (zaczynamy z temperatury T = 10) .
@@ -57,6 +63,8 @@ n_iter <- 1000 # Wybrana liczba iteracji dla pojedynczj bety
 
 for(i in 1:10) {
   
+  print(paste0("Symulowane wyżarzanie: próba nr ", i))
+  
   permutacje_wynik1[[i]] <- symulated_anneling(example_goal_function, start = perm_start, p=p, 
                                                beta=seq(1/10, 100, 2), number_of_iterations = n_iter)[["found_point"]]
   wartosc1[i] <- example_goal_function(permutacje_wynik1[[i]])
@@ -90,7 +98,7 @@ for(i in 1:10) {
 # Wykresy obrazujace proby wyzarzania dla roznych bet
 
 plot(wartosc1, main = "10 prób symulowanego wyżarzania dla różnych ciągów temperatur" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
-     ylim = c(-example_goal_function(perm_start) - 10,example_goal_function(actual_permutation) + 10), font.lab=2, font = 2, type = "b", lwd=2)
+     ylim = c(example_goal_function(perm_start) - 10,example_goal_function(actual_permutation) + 10), font.lab=2, font = 2, type = "b", lwd=2)
 axis(side=1, at=1:10, labels = TRUE, font = 2)
 axis(side=2, at=c(-10,0,10,20,30,40,50,60), labels = TRUE, font = 2)
 
@@ -108,6 +116,11 @@ legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "B
        lty = 1, lwd = 2, cex=0.8, text.font = 2, , horiz=TRUE)
 
 
+#####################################
+#####################################
+#####################################
+#####################################
+
 # Wykresy porownujace na inny sposob zbieznosc do max dla roznych bet (EPDF).
 # Wartosc 0 na wykresie odpowiada wartosci logarytmu goal_function w permutacji startowej (id),
 # a wartosc 1 na wykresie odpowiada maksymalnej wartosci logarytmu goal_function.
@@ -115,7 +128,7 @@ legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "B
 # Kryteria stopu sa wylaczone przy tych testach.
 
 # Parametry goal_function
-p <- 10
+p <- 10 # bedziemy badac dla p = 10
 n <- 100
 
 example_goal_function <- goal_function_maker(p, n)
@@ -170,3 +183,44 @@ plot_epdf(values_list = list_of_lists_of_log_values,
           max_y_scale = 1)
 
 # 1280 iteracji przynosi już niewielki zysk ponad 640.
+
+#####################################
+#####################################
+#####################################
+#####################################
+
+# Sprawdzę teraz jak dla 700 iteracji poradzi sobie 100 wywołań wyżarzania (dla bety log(log(n))) )
+
+# Dobrane parametry - najpierw p = 10, potem p = 15 (z wlaczonymi warunkami stopu)
+p <- 15
+n <- 20
+
+example_goal_function <- goal_function_maker(p, n)
+actual_permutation <- as.cycle(as.word(c(2:p, 1)))
+
+perm_start <- permutations::id # Wybrana permutacja startowa
+n_iter <- 700 # Wybrana liczba iteracji dla pojedynczj bety
+
+for(i in 1:100) {
+  
+  print(paste0("Symulowane wyżarzanie: próba nr ", i))
+  
+  permutacje_wynik5[[i]] <- symulated_anneling(example_goal_function, start= perm_start, p=p, 
+                                               beta=log(log(3:100)), 
+                                               number_of_iterations = n_iter)[["found_point"]]
+  wartosc5[i] <- example_goal_function(permutacje_wynik5[[i]])
+
+  
+}
+
+
+plot(wartosc5, main = "100 prób symulowanego wyżarzania dla ciągu log(log(n))" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
+     ylim = c(example_goal_function(perm_start) - 10,example_goal_function(actual_permutation) + 10), font.lab=2, font = 2, type = "b", lwd=2)
+axis(side=1, at=1:100, labels = FALSE, font = 2)
+axis(side=2, at=c(-10,0,10,20,30,40,50,60), labels = TRUE, font = 2)
+lines(replicate(100,example_goal_function(perm_start)), col = "green",lwd = 2, type="l") # startowa
+lines(replicate(100,example_goal_function(actual_permutation)), col = "aquamarine3",lwd = 2, type="l") # max
+text(x = 50, y = example_goal_function(perm_start) - 5, "Permutacja startowa", font = 2)
+text(x = 50, y = example_goal_function(actual_permutation) + 5, "Kandydat na max", lwd = 3, font = 2)
+
+mean(wartosc5)
