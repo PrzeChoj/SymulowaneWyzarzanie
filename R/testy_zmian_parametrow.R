@@ -17,10 +17,10 @@ example_goal_function(actual_permutation) # na kandydacie na max
 
 # Testy wyzarzania dla roznych metod schladzania.
 
-perm_found <- symulated_anneling(example_log_goal_function, p=p, beta=1:100, number_of_iterations = 100)
+perm_found <- symulated_anneling(example_goal_function, p=p, beta=1:100, number_of_iterations = 100)
 print(paste0("W wyniku symulowanego wyżarzania otrzymano permutację ",
              perm_found, " dla której wartość logarytmu funkcji celu wynosi ",
-             example_log_goal_function(perm_found), "."))
+             example_goal_function(perm_found), "."))
 
 
 #####################################
@@ -38,6 +38,7 @@ print(paste0("W wyniku symulowanego wyżarzania otrzymano permutację ",
 # Piąty typ bet: ciag b_n = log(log(n)).
 # Szósty typ bet: ciag b_n = log(n) (na starcie kilka innych wartości).
 
+set.seed(1234)
 
 wartosc1 <- numeric()
 permutacje_wynik1 <- list()
@@ -74,12 +75,12 @@ for(i in 1:10) {
   wartosc2[i] <- example_goal_function(permutacje_wynik2[[i]])
   
   permutacje_wynik3[[i]] <- symulated_anneling(example_goal_function, start = perm_start, p=p, 
-                                               beta=c(1/100,1/90,1/80,1/70,1/60,1/50,1/40,1/30,1/20,1/10,1,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200), 
+                                               beta=c(1/ (10 * (10:1)), 1, 10 * (1:20)),
                                                number_of_iterations = n_iter)[["found_point"]]
   wartosc3[i] <- example_goal_function(permutacje_wynik3[[i]])
   
   permutacje_wynik4[[i]] <- symulated_anneling(example_goal_function, start= perm_start, p=p, 
-                                               beta=c(1/10,1/9,1/8,1/7,1/6,1/5,1/4,1/3,1/2,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), 
+                                               beta=c(1/ (10:1), 2:20),
                                                number_of_iterations = n_iter)[["found_point"]]
   wartosc4[i] <- example_goal_function(permutacje_wynik4[[i]])
   
@@ -113,7 +114,7 @@ text(x = 5.5, y = example_goal_function(perm_start) - 5, "Permutacja startowa", 
 text(x = 5.5, y = example_goal_function(actual_permutation) + 5, "Kandydat na max", lwd = 3, font = 2)
 legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "Bety 6"),
        col=c("black", "red", "blue", "burlywood", "chartreuse1", "coral"), 
-       lty = 1, lwd = 2, cex=0.8, text.font = 2, , horiz=TRUE)
+       lty = 1, lwd = 2, cex=0.8, text.font = 2, horiz=TRUE)
 
 
 #####################################
@@ -143,7 +144,9 @@ number_of_iterations <- 1000
 M <- 10
 
 # Wywolanie wyzarzania M razy dla kazdego z ciagow bet
-list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_function, p, beta, number_of_iterations, M)
+list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_function,
+                                                               p, beta,
+                                                               number_of_iterations, M)
 
 
 # Na wykresie usredniamy uzyskane wartosci w wywolaniach wyzarzania (patrzymy na poszczegolne iteracje).
