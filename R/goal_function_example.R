@@ -4,6 +4,8 @@
 
 source("R/Wyzarzanie_algorytm.R")
 
+set.seed(1234)
+
 # trzeba trzymac wielkosc tablicy
 perm <- as.cycle(as.word(c(1,4,5,2,3,6))) # (1)(3,5)(2,4)(6)
 permutations::fixed(perm)  # pamięta o 1. Nie pamięta o 6
@@ -12,7 +14,7 @@ length(permutations::fixed(perm))  # 5
 
 # przyklad z `goal_function_maker`:
 p <- 10
-n <- 100
+n <- 20
 
 example_goal_function <- goal_function_maker(p, n)
 
@@ -25,7 +27,7 @@ example_goal_function(runif_transposition(p))
 
 # porownanie podstawowego MH i symulowanego wyzarzania:
 number_of_iterations <- 100
-beta <- log(c(2:4))
+beta <- log(log(c(2:10)))
 
 sa <- symulated_anneling(example_goal_function, p=p, beta=beta,
                          number_of_iterations = number_of_iterations)
@@ -45,13 +47,13 @@ perm_found_MH <- mh[["found_point"]]
 
 # EPDF plot
   # For number_of_iterations testing
-beta <- log(2:5)
-number_of_iterations <- 10 * 2^(0:4)
+beta <- log(log(c(2:10)))
+number_of_iterations <- 10 * 2^(0:2)
 M <- 30
 
 list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_function,
-                                                                         p, beta,
-                                                                         number_of_iterations, M)
+                                                               p, beta,
+                                                               number_of_iterations, M)
 
 plot_epdf(values_list = list_of_lists_of_log_values,
           min_val = example_goal_function(permutations::id),
@@ -63,7 +65,7 @@ plot_epdf(values_list = list_of_lists_of_log_values,
 
   # For testing beta strategies
 beta <- list(1:4, log(2:5), log(1 + (1:4)/10))
-number_of_iterations <- 200
+number_of_iterations <- 20
 M <- 10
 
 list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_function, p, beta, number_of_iterations, M)

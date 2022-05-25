@@ -47,7 +47,7 @@ trim_values <- function(values, min_val=NULL, max_val=NULL){
   if(is.null(max_val))
     max_val = max(values)
   
-  pmin(1, pmax(0, (cummax(values) - min_val) / max_val))
+  pmin(1, pmax(0, (cummax(values) - min_val) / (max_val - min_val)))
 }
 
 #' Plot EPDF for multiple sets of values
