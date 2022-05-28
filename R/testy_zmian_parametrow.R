@@ -195,7 +195,7 @@ plot_epdf(values_list = list_of_lists_of_log_values,
 # Sprawdzę teraz jak dla 700 iteracji poradzi sobie 100 wywołań wyżarzania (dla bety log(log(n))) )
 
 # Dobrane parametry - najpierw p = 10, potem p = 15 (z wlaczonymi warunkami stopu)
-p <- 15
+p <- 10
 n <- 20
 
 example_goal_function <- goal_function_maker(p, n)
@@ -212,7 +212,7 @@ for(i in 1:100) {
                                                beta=log(log(3:100)), 
                                                number_of_iterations = n_iter)[["found_point"]]
   wartosc5[i] <- example_goal_function(permutacje_wynik5[[i]])
-
+  
   
 }
 
@@ -227,3 +227,28 @@ text(x = 50, y = example_goal_function(perm_start) - 5, "Permutacja startowa", f
 text(x = 50, y = example_goal_function(actual_permutation) + 5, "Kandydat na max", lwd = 3, font = 2)
 
 mean(wartosc5)
+
+
+# Jeszcze na koniec porownanie najlepszego znalezionego ciagu bet ze stalym ciagiem jedynek.
+
+p <- 10
+n <- 100
+
+example_goal_function <- goal_function_maker(p, n)
+actual_permutation <- as.cycle(as.word(c(2:p, 1)))
+
+beta <- list(log(log(3:22)), rep(1,20))
+number_of_iterations <- 700
+M <- 50
+
+list_of_lists_of_log_values <- get_list_of_lists_of_log_values(example_goal_function,
+                                                               p, beta,
+                                                               number_of_iterations, M)
+
+plot_epdf(values_list = list_of_lists_of_log_values,
+          min_val = example_goal_function(permutations::id),
+          max_val = example_goal_function(actual_permutation),
+          max_y_scale = 1,
+          legend_text = c("b_n = log(log(n+2))", "b_n = 1"))
+
+# log(log(n)) osiaga lepsze rezultaty niz 1
