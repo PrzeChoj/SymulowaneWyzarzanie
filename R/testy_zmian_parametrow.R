@@ -214,7 +214,7 @@ for(i in 1:100) {
   sa <- symulated_anneling(example_goal_function3, start= perm_start, p=p, 
                            beta=log(log(3:100)), 
                            number_of_iterations = n_iter)
-  
+
   SA_log_log_perm[[i]] <- sa[["found_point"]]
   SA_log_log_results[i] <- example_goal_function3(SA_log_log_perm[[i]])
   
