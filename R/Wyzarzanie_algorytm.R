@@ -18,7 +18,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
                                stopping_criteria=TRUE){
   if(show_progress_bar)
     progressBar <- utils::txtProgressBar(min = 0, max = length(beta),
-                                        initial = 1)
+                                         initial = 1)
   
   # wylacz stopping
   if(!stopping_criteria){
@@ -45,7 +45,7 @@ symulated_anneling <- function(funkcja, start=permutations::id,
   all_acceptance_rates <- numeric(0)
   points <- list()
   number_of_iterations_cumsum <- cumsum(number_of_iterations_for_every_beta)
-    
+  
   for(i in 1:length(beta)){
     b <- beta[i]
     if(show_progress_bar)
@@ -55,8 +55,8 @@ symulated_anneling <- function(funkcja, start=permutations::id,
     lista_wynik <- single_symulated_anneling(punkt_prev, b, funkcja,
                                              number_of_iterations_for_every_beta[i],
                                              p)
-  
-      
+    
+    
     punkt <- lista_wynik[["permutation_found"]]
     found_point_function_logvalue <- lista_wynik[["permutation_found_function_logvalue"]]
     acceptance_rate <- lista_wynik[["acceptance_rate"]]
@@ -128,7 +128,7 @@ single_symulated_anneling <- function(punkt_startowy, b, funkcja,
   stopifnot(length(b) == 1, is.numeric(b))
   
   l_akcept <- 0 # liczba zaakceptowanych zmian permutacji
-
+  
   X <- list() # lista wybranych permutacji w kolejnych iteracjach
   X[[1]] <- punkt_startowy
   funkcja_punkt_startowy <- funkcja(punkt_startowy)
@@ -137,7 +137,7 @@ single_symulated_anneling <- function(punkt_startowy, b, funkcja,
   log_values[1] <- funkcja_aktualny
   
   U_wylosowane <- runif(number_of_iterations)
-
+  
   for(i in 2:number_of_iterations){
     transp <- runif_transposition(p) # Wyznaczamy losowa transpozycje
     
@@ -160,7 +160,7 @@ single_symulated_anneling <- function(punkt_startowy, b, funkcja,
       
     }
   }
-    
+  
   # Sprawdzamy czy otrzymana permutacja daje większą wartość niż poprzednia, tylko jeżeli tak jest to akceptujemy nową.
   
   if(funkcja_aktualny > funkcja_punkt_startowy) {

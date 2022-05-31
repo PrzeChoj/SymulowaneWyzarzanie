@@ -27,18 +27,18 @@ example_goal_function(runif_transposition(p))
 
 # porownanie podstawowego MH i symulowanego wyzarzania:
 number_of_iterations <- 100
-beta <- log(log(c(2:10)))
+beta <- log(log(c(3:10)))
 
 sa <- symulated_anneling(example_goal_function, p=p, beta=beta,
                          number_of_iterations = number_of_iterations)
-print(sa)
+print(sa, log_value = TRUE)
 plot(sa)
 perm_found_SA <- sa[["found_point"]]
 
 mh <- MH(U = attr(example_goal_function, "U"), n_number = n,
-                    max_iter = length(sa[["goal_function_logvalues"]]),
-                    start = permutations::id)
-print(mh)
+         max_iter = length(sa[["goal_function_logvalues"]]),
+         start = permutations::id)
+print(mh, log_value = TRUE)
 plot(mh)
 perm_found_MH <- mh[["found_point"]]
 
@@ -46,8 +46,8 @@ perm_found_MH <- mh[["found_point"]]
 
 
 # EPDF plot
-  # For number_of_iterations testing
-beta <- log(log(c(2:10)))
+# For number_of_iterations testing
+beta <- log(log(c(3:10)))
 number_of_iterations <- 10 * 2^(0:2)
 M <- 30
 
@@ -63,7 +63,7 @@ plot_epdf(values_list = list_of_lists_of_log_values,
 
 
 
-  # For testing beta strategies
+# For testing beta strategies
 beta <- list(1:4, log(2:5), log(1 + (1:4)/10))
 number_of_iterations <- 20
 M <- 10

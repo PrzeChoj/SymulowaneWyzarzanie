@@ -122,24 +122,31 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
 
 #' 1. beta jest lista, wtedy testujesz algorytmy z roznymi betami
 #' 2. number_of_iterations jest wektorem, wtedy testujesz algorytmy z roznymi długościami kroków pojedynczych iteracji `single_symulated_anneling`
-get_list_of_lists_of_log_values <- function(goal_function, p, beta, number_of_iterations, M){
+get_list_of_lists_of_log_values <- function(goal_function, p, beta, number_of_iterations, M, print_progress = TRUE){
+  if(print_progress){
+    start_time <- Sys.time()
+  }
+  
   list_of_lists_of_log_values <- list()
   
   number_of_loops <- ifelse(is.list(beta),
                             length(beta), # testujemy różne strategie dla wzrastania beta
                             length(number_of_iterations)) # testujemy różne strategie liczby krokow w iteracji
   
-  stopifnot(number_of_loops > 1)
+  stopifnot(number_of_loops > 1) # sprawdz, czy wystarczy stopifnot((number_of_loops > 1) || is.list(beta))
   
   progressBar_iterations <- number_of_loops * M
-  
-  progressBar <- utils::txtProgressBar(initial = 1, min = 0,
-                                       max = progressBar_iterations)
+  if(print_progress){
+    progressBar <- utils::txtProgressBar(initial = 1, min = 0,
+                                         max = progressBar_iterations)
+  }
   
   for(i in 1:number_of_loops){
     list_of_log_values <- list()
     for(j in 1:M){
-      utils::setTxtProgressBar(progressBar, (i-1)*M + j)
+      if(print_progress){
+        utils::setTxtProgressBar(progressBar, (i-1)*M + j)
+      }
       
       if(is.list(beta)){
         beta_i <- beta[[i]]
@@ -157,7 +164,13 @@ get_list_of_lists_of_log_values <- function(goal_function, p, beta, number_of_it
     }
     list_of_lists_of_log_values[[i]] <- list_of_log_values
   }
-  close(progressBar)
+  if(print_progress){
+    close(progressBar)
+    
+    end_time <- Sys.time()
+    
+    print(end_time - start_time)
+  }
   
   list_of_lists_of_log_values
 }
