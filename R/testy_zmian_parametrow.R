@@ -180,6 +180,7 @@ beta3 <- log(log(3:22))
 number_of_iterations <- 10 * 2^(0:7)
 M <- 30
 
+# MiNI, 2 godziny:
 list_of_lists_of_log_values_num_iters <- get_list_of_lists_of_log_values(example_goal_function2,
                                                                          p, beta3,
                                                                          number_of_iterations, M)
