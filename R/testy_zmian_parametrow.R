@@ -61,6 +61,9 @@ permutacje_wynik6 <- list()
 perm_start <- permutations::id # Wybrana permutacja startowa
 n_iter <- 1000 # Wybrana liczba iteracji dla pojedynczj bety
 
+# to jest bez sensu, bo rożne bety będą powodować różne momenty zatrzymania się algorytmu.
+  # Zawsze tak jest, że im dłużej algorytm działa, tym lepszą wartość znajdzie, bo można
+  # sie tylko z czasem poprawiać.
 for(i in 1:10) {
   
   print(paste0("Symulowane wyżarzanie: próba nr ", i))
@@ -136,7 +139,8 @@ set.seed(1234)
 example_goal_function2 <- goal_function_maker(p, n)
 
 # Typy ciagow bet
-beta <- list(rep(1, 20), 1:20, log(2:21), sqrt(log(2:21)), log(log(3:22)), log(log(log(16:35))))
+beta <- list(rep(1, 20), 1:20, log(2:21), sqrt(log(2:21)), log(log(1:20 + 2)),
+             log(log(log(1:20 + 15))), log(log(log(1:20 + 30))))
 
 # Liczba iteracji
 number_of_iterations <- 1000
@@ -153,11 +157,17 @@ list_of_lists_of_log_values_betas <- get_list_of_lists_of_log_values(example_goa
 # Na wykresie usredniamy uzyskane wartosci w wywolaniach wyzarzania (patrzymy na poszczegolne iteracje).
 # Rozne krzywe odpowiadaja roznym betom.
 
+#save(list_of_lists_of_log_values_betas, file="data/list_of_lists_of_log_values_betas.RData")
+#load("data/list_of_lists_of_log_values_betas.RData")
+
 plot_epdf(values_list = list_of_lists_of_log_values_betas,
           min_val = example_goal_function2(permutations::id),
           max_val = example_goal_function2(actual_permutation),
           max_y_scale = 1,
-          legend_text = c("b_n = 1", "b_n = n", "b_n = log(n+1)", "b_n = sqrt(log(n+1))", "b_n = log(log(n+2))", "b_n = log(log(log(n+15)))"))
+          legend_text = c("b_n = 1", "b_n = n", "b_n = log(n+1)",
+                          "b_n = sqrt(log(n+1))", "b_n = log(log(n+2))",
+                          "b_n = log(log(log(n+15)))"),
+          my_title = paste0("EPDF plot - mean of ", M, " runs"))
 
 # log(log(n)) oraz log(log(log(n))) radzą sobie podobnie i zdecydowanie lepiej od innych.
 
@@ -173,10 +183,12 @@ M <- 30
 list_of_lists_of_log_values_num_iters <- get_list_of_lists_of_log_values(example_goal_function2,
                                                                          p, beta3,
                                                                          number_of_iterations, M)
+#save(list_of_lists_of_log_values_num_iters, file="data/list_of_lists_of_log_values_num_iters.RData")
+#load("data/list_of_lists_of_log_values_num_iters.RData")
 
 plot_epdf(values_list = list_of_lists_of_log_values_num_iters,
           min_val = example_goal_function2(permutations::id),
-          max_val = 100,
+          max_val = example_goal_function2(actual_permutation), # TODO dlaczego tu bylo wpisane 100?
           max_y_scale = 1,
           legend_text = paste0("number_of_iterations = ", number_of_iterations))
 
@@ -207,14 +219,24 @@ SA_log_log_results = numeric(0)
 ma_perm = list()
 ma_results = numeric(0)
 
-for(i in 1:100) {
+liczba_powtorzen <- 100
+sredni_czas_iteracji <- NULL
+
+for(i in 1:liczba_powtorzen) { # MiNI 54 minuty
+  start_ta_iteracja <- Sys.time()
   
   print(paste0("Symulowane wyżarzanie: próba nr ", i))
+  
+  if(i > 1){
+    print(paste0("Estymowany pozostaly czas to ",
+                 (liczba_powtorzen - i + 1) * sredni_czas_iteracji,
+                 " ", attr(sredni_czas_iteracji, "units")))
+  }
   
   sa <- symulated_anneling(example_goal_function3, start= perm_start, p=p, 
                            beta=log(log(3:100)), 
                            number_of_iterations = n_iter)
-
+  
   SA_log_log_perm[[i]] <- sa[["found_point"]]
   SA_log_log_results[i] <- example_goal_function3(SA_log_log_perm[[i]])
   
@@ -222,12 +244,38 @@ for(i in 1:100) {
            max_iter = length(sa[["goal_function_logvalues"]]))
   ma_perm[[i]] <- mh[["found_point"]]
   ma_results[i] <- mh[["found_point_function_logvalue"]]
+  
+  end_ta_iteracja <- Sys.time()
+  if(i == 1){
+    sredni_czas_iteracji <- end_ta_iteracja - start_ta_iteracja
+  }else{
+    sredni_czas_iteracji <- (sredni_czas_iteracji * (i-1) + end_ta_iteracja - start_ta_iteracja) / i
+  }
 }
 
+#save(ma_results, SA_log_log_results, file="data/porownanie_log_log_MH_p_10_n_100.RData")
+#load("data/porownanie_log_log_MH_p_10_n_100.RData")
+
+P_mh <- ecdf(ma_results)
+plot(P_mh, col="red")
+
+P_SA <- ecdf(SA_log_log_results)
+lines(P_SA, col="green")
+lines(x=c(example_goal_function3(actual_permutation),
+          example_goal_function3(actual_permutation)),
+      y=c(0,1), type = "l", lty=3)
+
+legend("topleft", col=c("red", "green"), lty = c(1,1), cex = 1.2, inset=0.002,
+       legend = c("results of MH optimization", "results of SA optimization"))
+
+wilcox.test(ma_results, SA_log_log_results) # p-val = 1.6 * 10^(-9)
 
 
-# TODO(plot i test statystyczny):
-plot(wartosc5, main = "100 prób symulowanego wyżarzania dla ciągu log(log(n))" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
+
+
+
+# Stary kod generujący obrazek:
+plot(SA_log_log_results, main = "100 prób symulowanego wyżarzania dla ciągu log(log(n))" , xlab = "Numer próby", ylab = "Osiągnięta wartość funkcji celu",
      ylim = c(example_goal_function3(perm_start) - 10,example_goal_function3(actual_permutation) + 10), font.lab=2, font = 2, type = "b", lwd=2)
 axis(side=1, at=1:100, labels = FALSE, font = 2)
 axis(side=2, at=c(-10,0,10,20,30,40,50,60), labels = TRUE, font = 2)
