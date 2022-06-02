@@ -57,7 +57,8 @@ trim_values <- function(values, min_val=NULL, max_val=NULL){
 #' @param max_val value that will be considered 1
 plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
                       line_colours = "rainbow", max_y_scale = 1,
-                      show_legend = TRUE, legend_text = NULL){
+                      show_legend = TRUE, legend_text = NULL,
+                      my_title = "EPDF plot"){
   stopifnot(max_y_scale > 0, max_y_scale <= 1)
   
   num_of_algorithms <- length(values_list)
@@ -101,7 +102,7 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
   }else{
     xlab <- "number of function calls"
   }
-  graphics::title(main = "EPDF plot", sub = "for different algorithms",
+  graphics::title(main = my_title, sub = "for different algorithms",
                   xlab = xlab, ylab = "optimization goals reached")
   graphics::axis(1)
   graphics::axis(2)

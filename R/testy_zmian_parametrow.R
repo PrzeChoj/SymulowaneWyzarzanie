@@ -3,7 +3,7 @@ source("R/Wyzarzanie_algorytm.R")
 set.seed(1234)
 
 # Dobrane parametry
-p <- 10
+p <- 25
 n <- 20
 
 # Od razu goal function jest juz zlogarytmowana
@@ -20,7 +20,7 @@ example_goal_function1(actual_permutation) # na kandydacie na max
 
 sa <- symulated_anneling(example_goal_function1, p=p, beta=1:100, number_of_iterations = 100)
 print(sa, log_value = TRUE)
-
+plot(sa)
 
 #####################################
 #####################################
@@ -131,24 +131,33 @@ legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "B
 # Kryteria stopu sa wylaczone przy tych testach.
 
 # Parametry goal_function
-p <- 10 # bedziemy badac dla p = 10
-n <- 100
+  # bedziemy badac dla (p,n) = (10, 100); potem dla (p, n) = (25, 20)
+p <- 25
+n <- 20
 
 set.seed(1234)
 
 example_goal_function2 <- goal_function_maker(p, n)
 
 # Typy ciagow bet
-beta <- list(rep(1, 20), 1:20, log(2:21), sqrt(log(2:21)), log(log(1:20 + 2)),
-             log(log(log(1:20 + 15))), log(log(log(1:20 + 30))))
+beta_number <- 50
+beta <- list(rep(1, beta_number), 1:beta_number, log(1:beta_number + 1),
+             log(log(1:beta_number + 2)),
+             log(log(log(1:beta_number + 15))),
+             log(log(log(1:beta_number + 45))))
 
 # Liczba iteracji
 number_of_iterations <- 1000
 
 # Liczba wywolan wyzarzania dla danego ciagu bet
-M <- 10
+M <- 5
 
 # Wywolanie wyzarzania M razy dla kazdego z ciagow bet
+# MiNI:
+  # v1: p=10, n=100, M=10, number_of_iterations=1000, beta_number=20 -> ??
+  # v2: p=25, n=20, M=5, number_of_iterations=500, beta_number=20 -> 42 minutes -> 
+  # v3: p=25, n=20, M=5, number_of_iterations=1000, beta_number=25 -> 84 minutes -> Malo czasu mial logloglog, zeby sie rozkrecic.
+  # v4: p=25, n=20, M=5, number_of_iterations=1000, beta_number=50 -> 170 minutes -> Niebieski zwolnil, ale rozowy pnie sie w gore
 list_of_lists_of_log_values_betas <- get_list_of_lists_of_log_values(example_goal_function2,
                                                                      p, beta,
                                                                      number_of_iterations, M)
@@ -157,16 +166,18 @@ list_of_lists_of_log_values_betas <- get_list_of_lists_of_log_values(example_goa
 # Na wykresie usredniamy uzyskane wartosci w wywolaniach wyzarzania (patrzymy na poszczegolne iteracje).
 # Rozne krzywe odpowiadaja roznym betom.
 
-#save(list_of_lists_of_log_values_betas, file="data/list_of_lists_of_log_values_betas.RData")
-#load("data/list_of_lists_of_log_values_betas.RData")
+#save(list_of_lists_of_log_values_betas, file="data/list_of_lists_of_log_values_betas_v?.RData") # UWAGA! nie nadpisac!
+#load("data/list_of_lists_of_log_values_betas_v2.RData")
 
 plot_epdf(values_list = list_of_lists_of_log_values_betas,
           min_val = example_goal_function2(permutations::id),
           max_val = example_goal_function2(actual_permutation),
           max_y_scale = 1,
           legend_text = c("b_n = 1", "b_n = n", "b_n = log(n+1)",
-                          "b_n = sqrt(log(n+1))", "b_n = log(log(n+2))",
-                          "b_n = log(log(log(n+15)))"),
+                          #"b_n = sqrt(log(n+1))",
+                          "b_n = log(log(n+2))",
+                          "b_n = log(log(log(n+15)))",
+                          "b_n = log(log(log(n+30)))"),
           my_title = paste0("EPDF plot - mean of ", M, " runs"))
 
 # log(log(n)) oraz log(log(log(n))) radzą sobie podobnie i zdecydowanie lepiej od innych.
@@ -180,12 +191,14 @@ beta3 <- log(log(3:22))
 number_of_iterations <- 10 * 2^(0:7)
 M <- 30
 
-# MiNI, 2 godziny:
+# MiNI:
+  # v1: p=10, n=100 -> 2 godziny i cos sie popsulo z example_goal_function2 :(
+  # v2: p=25, n=20 -> ??
 list_of_lists_of_log_values_num_iters <- get_list_of_lists_of_log_values(example_goal_function2,
                                                                          p, beta3,
                                                                          number_of_iterations, M)
-#save(list_of_lists_of_log_values_num_iters, file="data/list_of_lists_of_log_values_num_iters.RData")
-#load("data/list_of_lists_of_log_values_num_iters.RData")
+#save(list_of_lists_of_log_values_num_iters, file="data/list_of_lists_of_log_values_num_iters_v?.RData")
+#load("data/list_of_lists_of_log_values_num_iters_v?.RData")
 
 plot_epdf(values_list = list_of_lists_of_log_values_num_iters,
           min_val = example_goal_function2(permutations::id),
@@ -203,8 +216,8 @@ plot_epdf(values_list = list_of_lists_of_log_values_num_iters,
 # Sprawdzę teraz jak dla 700 iteracji poradzi sobie 100 wywołań wyżarzania (dla bety log(log(n))) )
 # i porównam z bla bety 1, czyli standardowym algorytmem metropolisa
 
-# Dobrane parametry - najpierw p = 10, potem p = 15 (z wlaczonymi warunkami stopu)
-p <- 10
+# bedziemy badac dla (p,n) = (10, 100); potem dla (p, n) = (25, 20)
+p <- 25
 n <- 20
 
 set.seed(1234)
@@ -223,7 +236,10 @@ ma_results = numeric(0)
 liczba_powtorzen <- 100
 sredni_czas_iteracji <- NULL
 
-for(i in 1:liczba_powtorzen) { # MiNI 54 minuty
+# MiNI:
+  # v1: p=10, n=100 -> 54 minuty
+  # v2: p=25, n=20 -> ? minuty
+for(i in 1:liczba_powtorzen) {
   start_ta_iteracja <- Sys.time()
   
   print(paste0("Symulowane wyżarzanie: próba nr ", i))
@@ -254,8 +270,8 @@ for(i in 1:liczba_powtorzen) { # MiNI 54 minuty
   }
 }
 
-#save(ma_results, SA_log_log_results, file="data/porownanie_log_log_MH_p_10_n_100.RData")
-#load("data/porownanie_log_log_MH_p_10_n_100.RData")
+#save(ma_results, SA_log_log_results, file="data/porownanie_log_log_MH_v?.RData")
+#load("data/porownanie_log_log_MH_v?.RData")
 
 P_mh <- ecdf(ma_results)
 plot(P_mh, col="red")
