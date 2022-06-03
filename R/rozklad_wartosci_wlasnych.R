@@ -77,11 +77,9 @@ get_values <- function(p, n, sigma_matrix, M){
   )
 }
 
-# TODO list:
-# 1. Rozklady w ostatnim plocie porownaj tez testem na rownosc rozkladu, a nie tylko median
-# 2. Dodac tytuly i opisy osi wykresow
-# 3. Zapisac wykres ecdf (to nie ggplot)
-# 4. Jak bedzie czas: v3: inna macierz sigma_matrix
+# TODO list (jak bedzie czas):
+  # 1. v3: inna macierz sigma_matrix
+  # 2. v4: p = 100
 
 set.seed(1234)
 
@@ -89,7 +87,7 @@ set.seed(1234)
 #save(v1, file="data/eigen_v1.RData") # UWAGA! nie nadpisac!
 #load("data/eigen_v1.RData")
 
-#v2 <- get_values(p=25, n=20, sigma_matrix=diag(25), M=50) # MiNI 90
+#v2 <- get_values(p=25, n=20, sigma_matrix=diag(25), M=50) # MiNI 90 minut
 #save(v2, file="data/eigen_v2.RData") # UWAGA! nie nadpisac!
 #load("data/eigen_v2.RData")
 
@@ -98,8 +96,19 @@ set.seed(1234)
 # NOTE: W wilcox.test: H_0 = (mediany rozkladow sa takie same); H_1 = (mediany rozkladow sa inne)
 # NOTE: dla sigma_matrix = diag(p), plot_frob_est bedzie przesunietym plot_frob, bo od kazdego odejmujemy troche.Interpretacja jest jednak troche inna
 
+plot_experiment <- "v1" # narazie jest v1 i v2 i raczej tak zostanie xd
 
-v <- v1
+if(plot_experiment == "v1"){
+  v <- v1
+  p <- 10
+  n <- 20
+}else if(plot_experiment == "v2"){
+  v <- v2
+  p <- 25
+  n <- 20
+}else{
+  print(paste0("Zla wartosc plot_experiment = ", plot_experiment))
+}
 
 
 # plots:
@@ -109,32 +118,33 @@ plot_eigen <- data.frame("eigen_U" = v$eigen_U,
                          "eigen_U_mh" = v$eigen_U_mh) %>% 
   pivot_longer(cols = c("eigen_U", "eigen_U_bg", "eigen_U_mh"),
                names_to = "matrix_type", values_to = "eigen_value") %>% 
-  ggplot(aes(x=matrix_type, y=eigen_value)) + 
+  ggplot(aes(x=matrix_type, y=eigen_value, fill=matrix_type)) + 
   geom_violin() +
-  geom_hline(yintercept = 1, linetype="dashed", color = "red")
+  geom_hline(yintercept = 1, linetype="dashed", color = "red") +
+  labs(title="Rozkład wartości własnych estymatora macierzy Covariancji",
+       subtitle = paste0("na podstawie próbki wielkosci n=", n,
+                         " z rozkładu normalnego N(0, I) wymiaru p=", p),
+       x = "Metoda poprawiania estymatora", y = "Wartości własne") +
+  scale_x_discrete(labels=c("Zwykly estymator U",
+                            "U poprawione algorytmem BG",
+                            "U poprawione algorytmem MH")) +
+  theme(
+    plot.title = element_text(size=20, face="bold"),
+    plot.subtitle = element_text(size=16, face="bold"),
+    axis.title.x = element_text(size=16, face="bold"),
+    axis.title.y = element_text(size=16, face="bold"),
+    axis.text.x = element_text(face="bold", size=14),
+    axis.text.y = element_text(face="bold", size=14)
+  ) +
+  scale_y_continuous(breaks = 0:5) +
+  geom_boxplot(width=0.1, fill='#FFFFFF') +
+  theme(legend.position='none')
 plot_eigen
-#ggsave("./plots/plot_eigen_v?.png", plot_eigen)
+#ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_eigen_", plot_experiment, ".png"), plot_eigen, width = 10, height = 6)
 
 wilcox.test(v$eigen_U, v$eigen_U_bg)    # p_val: v1 0.0001;        v2 2.2*10^(-16)
 wilcox.test(v$eigen_U, v$eigen_U_mh)    # p_val: v1 1.5 * 10^(-5); v2 2.2*10^(-16)
 wilcox.test(v$eigen_U_bg, v$eigen_U_mh) # p_val: v1 0.9763;        v2 0.7018       <<<--- takie same mediany
-
-
-plot_frob <- data.frame("frob_norm_U" = v$frob_norm_U,
-                        "frob_norm_U_bg" = v$frob_norm_U_bg,
-                        "frob_norm_U_mh" = v$frob_norm_U_mh) %>% 
-  pivot_longer(cols = c("frob_norm_U", "frob_norm_U_bg", "frob_norm_U_mh"),
-               names_to = "matrix_type", values_to = "eigen_value") %>% 
-  ggplot(aes(x=matrix_type, y=eigen_value)) + 
-  geom_violin() +
-  geom_hline(yintercept = norm(v$sigma_matrix, "F"),
-             linetype = "dashed", color = "red")
-plot_frob
-#ggsave("./plots/plot_frob_v?.png", plot_frob)
-
-wilcox.test(v$frob_norm_U, v$frob_norm_U_bg)    # p_val: v1 5*10^(-16);   v2 2.2*10^(-16)
-wilcox.test(v$frob_norm_U, v$frob_norm_U_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
-wilcox.test(v$frob_norm_U_bg, v$frob_norm_U_mh) # p_val: v1 0.3088;       v2 0.04521      <<<--- v1: byc moze takie same mediany; v2: odrzucam hipoteze o takich samych medianach, czyli MH lepszy niż BG
 
 
 plot_frob_est <- data.frame("frob_norm_est" = v$frob_norm_est,
@@ -142,31 +152,62 @@ plot_frob_est <- data.frame("frob_norm_est" = v$frob_norm_est,
                             "frob_norm_est_mh" = v$frob_norm_est_mh) %>% 
   pivot_longer(cols = c("frob_norm_est", "frob_norm_est_bg", "frob_norm_est_mh"),
                names_to = "matrix_type", values_to = "eigen_value") %>% 
-  ggplot(aes(x=matrix_type, y=eigen_value)) + 
+  ggplot(aes(x=matrix_type, y=eigen_value, fill=matrix_type)) + 
   geom_violin() +
   geom_hline(yintercept = 0,
-             linetype = "dashed", color = "red")
+             linetype = "dashed", color = "red") +
+  geom_boxplot(width=0.1, fill='#FFFFFF') +
+  labs(title="Norma Frobeniusa błędu estymatora macierzy Covariancji",
+       subtitle = paste0("na podstawie próbki wielkosci n=", n,
+                         " z rozkładu normalnego N(0, I) wymiaru p=", p),
+       x = "Metoda poprawiania estymatora",
+       y = "Norma Frobeniusa błędu estymacji, czyli (U - I)") +
+  theme(
+    plot.title = element_text(size=20, face="bold"),
+    plot.subtitle = element_text(size=16, face="bold"),
+    axis.title.x = element_text(size=16, face="bold"),
+    axis.title.y = element_text(size=16, face="bold"),
+    axis.text.x = element_text(face="bold", size=14),
+    axis.text.y = element_text(face="bold", size=14)
+  ) +
+  scale_x_discrete(labels=c("Zwykly estymator U",
+                            "U poprawione algorytmem BG",
+                            "U poprawione algorytmem MH")) +
+  theme(legend.position="none")
 plot_frob_est
-#ggsave("./plots/plot_frob_est_v?.png", plot_frob_est)
+#ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_frob_est_", plot_experiment, ".png"), plot_frob_est, width = 10, height = 6)
 
 wilcox.test(v$frob_norm_est, v$frob_norm_est_bg)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
 wilcox.test(v$frob_norm_est, v$frob_norm_est_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
 wilcox.test(v$frob_norm_est_bg, v$frob_norm_est_mh) # p_val: v1 0.01101;      v2 2.5*10^(-6) <<<--- inne mediany; MH leprzy
 
 
-P_bg <- ecdf(v$f_val_bg)
-plot(P_bg, col="red")
+plot_EPDF_opt <- data.frame(BG = v$f_val_bg,
+                            MH = v$f_val_mh) %>% 
+  pivot_longer(cols = c("BG", "MH"),
+               names_to = "alg_type",
+               values_to = "found_max") %>% 
+  ggplot(aes(found_max, col=alg_type)) +
+  stat_ecdf(geom = "step", size=2) +
+  labs(title="EPDF rokładu znalezionej największej wartości",
+       subtitle = paste0("na podstawie próbki wielkosci n=", n,
+                         " z rozkładu normalnego N(0, I) wymiaru p=", p),
+       x = "Logarytm znalezionej wartości funkcji wiarogodności",
+       y = "Skumulowane estymowane prawdopodobieństwo",
+       col = "Użyty algorytm") +
+  theme(
+    plot.title = element_text(size=20, face="bold"),
+    plot.subtitle = element_text(size=16, face="bold"),
+    axis.title.x = element_text(size=16, face="bold"),
+    axis.title.y = element_text(size=16, face="bold"),
+    axis.text.x = element_text(face="bold", size=14),
+    axis.text.y = element_text(face="bold", size=14),
+    legend.text = element_text(face="bold", size=14)
+  )
+plot_EPDF_opt
+#ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_EPDF_opt_", plot_experiment, ".png"), plot_EPDF_opt, width = 10, height = 6)
 
-P_mh <- ecdf(v$f_val_mh)
-lines(P_mh, col="green")
-
-legend("topleft", col=c("red", "green"), lty = c(1,1), cex = 1.2, inset=0.002,
-       legend = c("results of BG optimization", "results of MH optimization"))
-
-wilcox.test(v$f_val_bg, v$f_val_mh) # p_val: v1 0.97; v2 0.49 <<<--- takie same mediany funkcji wiarogodnosci
-
-
-
-
+wilcox.test(v$f_val_bg, v$f_val_mh) # p_val: v1 0.97; v2 0.49 <<<--- niema powodu podejrzewac, ze mediany log funkcji wiarogodnosci sa inne
+ks.test(v$f_val_bg, v$f_val_mh)     # p_val: v1 1   ; v2 0.55 <<<--- niema powodu podejrzewac, ze rozklady log funkcji wiarogodnosci sa inne
 
 
