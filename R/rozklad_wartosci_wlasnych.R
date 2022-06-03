@@ -78,7 +78,7 @@ get_values <- function(p, n, sigma_matrix, M){
 }
 
 # TODO list:
-# 1. Odpalic obliczenia dla v2
+# 1. Rozklady w ostatnim plocie porownaj tez testem na rownosc rozkladu, a nie tylko median
 # 2. Dodac tytuly i opisy osi wykresow
 # 3. Zapisac wykres ecdf (to nie ggplot)
 # 4. Jak bedzie czas: v3: inna macierz sigma_matrix
@@ -89,13 +89,13 @@ set.seed(1234)
 #save(v1, file="data/eigen_v1.RData") # UWAGA! nie nadpisac!
 #load("data/eigen_v1.RData")
 
-#v2 <- get_values(p=25, n=20, sigma_matrix=diag(25), M=50) # MiNI 90 minut?
+#v2 <- get_values(p=25, n=20, sigma_matrix=diag(25), M=50) # MiNI 90
 #save(v2, file="data/eigen_v2.RData") # UWAGA! nie nadpisac!
 #load("data/eigen_v2.RData")
 
 
 
-# NOTE: wilcox.test sprawdza równość mdian
+# NOTE: W wilcox.test: H_0 = (mediany rozkladow sa takie same); H_1 = (mediany rozkladow sa inne)
 # NOTE: dla sigma_matrix = diag(p), plot_frob_est bedzie przesunietym plot_frob, bo od kazdego odejmujemy troche.Interpretacja jest jednak troche inna
 
 
@@ -115,9 +115,9 @@ plot_eigen <- data.frame("eigen_U" = v$eigen_U,
 plot_eigen
 #ggsave("./plots/plot_eigen_v?.png", plot_eigen)
 
-wilcox.test(v$eigen_U, v$eigen_U_bg) # v1: p_val = 0.0001
-wilcox.test(v$eigen_U, v$eigen_U_mh) # v1: p_val = 1.5 * 10^(-5)
-wilcox.test(v$eigen_U_bg, v$eigen_U_mh) # v1: p_val = 0.9763 <<<--- takie same mediany
+wilcox.test(v$eigen_U, v$eigen_U_bg)    # p_val: v1 0.0001;        v2 2.2*10^(-16)
+wilcox.test(v$eigen_U, v$eigen_U_mh)    # p_val: v1 1.5 * 10^(-5); v2 2.2*10^(-16)
+wilcox.test(v$eigen_U_bg, v$eigen_U_mh) # p_val: v1 0.9763;        v2 0.7018       <<<--- takie same mediany
 
 
 plot_frob <- data.frame("frob_norm_U" = v$frob_norm_U,
@@ -132,9 +132,9 @@ plot_frob <- data.frame("frob_norm_U" = v$frob_norm_U,
 plot_frob
 #ggsave("./plots/plot_frob_v?.png", plot_frob)
 
-wilcox.test(v$frob_norm_U, v$frob_norm_U_bg) # v1: p_val = 5*10^(-15)
-wilcox.test(v$frob_norm_U, v$frob_norm_U_mh) # v1: p_val = 2.2*10^(-16)
-wilcox.test(v$frob_norm_U_bg, v$frob_norm_U_mh) # v1: p_val = 0.31 <<<--- byc moze takie same mediany
+wilcox.test(v$frob_norm_U, v$frob_norm_U_bg)    # p_val: v1 5*10^(-16);   v2 2.2*10^(-16)
+wilcox.test(v$frob_norm_U, v$frob_norm_U_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
+wilcox.test(v$frob_norm_U_bg, v$frob_norm_U_mh) # p_val: v1 0.3088;       v2 0.04521      <<<--- v1: byc moze takie same mediany; v2: odrzucam hipoteze o takich samych medianach, czyli MH lepszy niż BG
 
 
 plot_frob_est <- data.frame("frob_norm_est" = v$frob_norm_est,
@@ -149,9 +149,9 @@ plot_frob_est <- data.frame("frob_norm_est" = v$frob_norm_est,
 plot_frob_est
 #ggsave("./plots/plot_frob_est_v?.png", plot_frob_est)
 
-wilcox.test(v$frob_norm_est, v$frob_norm_est_bg) # v1: p_val = 2.2*10^(-16)
-wilcox.test(v$frob_norm_est, v$frob_norm_est_mh) # v1: p_val = 2.2*10^(-16)
-wilcox.test(v$frob_norm_est_bg, v$frob_norm_est_mh) # v1: p_val = 0.011 <<<--- inne mediany; MH leprzy
+wilcox.test(v$frob_norm_est, v$frob_norm_est_bg)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
+wilcox.test(v$frob_norm_est, v$frob_norm_est_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
+wilcox.test(v$frob_norm_est_bg, v$frob_norm_est_mh) # p_val: v1 0.01101;      v2 2.5*10^(-6) <<<--- inne mediany; MH leprzy
 
 
 P_bg <- ecdf(v$f_val_bg)
@@ -163,7 +163,7 @@ lines(P_mh, col="green")
 legend("topleft", col=c("red", "green"), lty = c(1,1), cex = 1.2, inset=0.002,
        legend = c("results of BG optimization", "results of MH optimization"))
 
-wilcox.test(v$f_val_bg, v$f_val_mh) # v1: p_val = 0.97 <<<--- takie same mediany funkcji wiarogodnosci
+wilcox.test(v$f_val_bg, v$f_val_mh) # p_val: v1 0.97; v2 0.49 <<<--- takie same mediany funkcji wiarogodnosci
 
 
 
