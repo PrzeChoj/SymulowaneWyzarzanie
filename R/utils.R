@@ -50,15 +50,16 @@ trim_values <- function(values, min_val=NULL, max_val=NULL){
   pmin(1, pmax(0, (cummax(values) - min_val) / (max_val - min_val)))
 }
 
-#' Plot EPDF for multiple sets of values
+#' Plot ECDF for multiple sets of values
 #' 
 #' @param values_list list of lists of values of goal_function that were found in the iteration; for a optimization method has to be the same length
 #' @param min_val value that will be considered 0
 #' @param max_val value that will be considered 1
-plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
+plot_ecdf <- function(values_list, min_val, max_val, xlog = TRUE,
                       line_colours = "rainbow", max_y_scale = 1,
                       show_legend = TRUE, legend_text = NULL,
-                      my_title = "EPDF plot"){
+                      my_title = "ECDF plot",
+                      my_xlab = NULL, my_ylab = NULL, my_sub = NULL){
   stopifnot(max_y_scale > 0, max_y_scale <= 1)
   
   num_of_algorithms <- length(values_list)
@@ -94,7 +95,8 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
       x_cords <- log10(x_cords)
     }
     graphics::lines.default(x_cords, avrage_for_ith_algorithm,
-                            type = "l", col = line_colours[i])
+                            type = "l", col = line_colours[i],
+                            lwd=4)
   }
   
   if(xlog){
@@ -102,8 +104,21 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
   }else{
     xlab <- "number of function calls"
   }
-  graphics::title(main = my_title, sub = "for different algorithms",
-                  xlab = xlab, ylab = "optimization goals reached")
+  if(!is.null(my_xlab)){
+    xlab <- my_xlab
+  }
+  if(!is.null(my_ylab)){
+    ylab <- my_ylab
+  }else{
+    ylab <- "optimization goals reached"
+  }
+  if(!is.null(my_sub)){
+    sub <- my_sub
+  }else{
+    sub <- "for different algorithms"
+  }
+  graphics::title(main = my_title, sub = sub,
+                  xlab = xlab, ylab = ylab)
   graphics::axis(1)
   graphics::axis(2)
   graphics::box()
@@ -114,8 +129,8 @@ plot_epdf <- function(values_list, min_val, max_val, xlog = TRUE,
     
     graphics::legend("topleft", inset=.002,
                      legend = legend_text,
-                     col = line_colours, cex = 0.7,
-                     lwd = 1)
+                     col = line_colours, cex = 1,
+                     lwd = 4)
   }
   
   invisible(NULL)

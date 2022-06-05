@@ -2,6 +2,11 @@ source("R/Wyzarzanie_algorytm.R")
 
 set.seed(1234)
 
+par(cex.axis = 1.5,
+    cex.main = 1.5,
+    cex.sub = 1.5,
+    cex.lab = 1.5)
+
 # Dobrane parametry
 p <- 25
 n <- 20
@@ -124,7 +129,7 @@ legend("topright", legend=c("Bety 1", "Bety 2", "Bety 3", "Bety 4", "Bety 5", "B
 #####################################
 #####################################
 
-# Wykresy porownujace na inny sposob zbieznosc do max dla roznych bet (EPDF).
+# Wykresy porownujace na inny sposob zbieznosc do max dla roznych bet (ECDF).
 # Wartosc 0 na wykresie odpowiada wartosci logarytmu goal_function w permutacji startowej (id),
 # a wartosc 1 na wykresie odpowiada maksymalnej wartosci logarytmu goal_function.
 
@@ -154,7 +159,7 @@ M <- 5
 
 # Wywolanie wyzarzania M razy dla kazdego z ciagow bet
 # MiNI:
-  # v1: p=10, n=100, M=10, number_of_iterations=1000, beta_number=20 -> ??
+  # v1: p=10, n=100, M=10, number_of_iterations=1000, beta_number=20 -> ?? # popsuty example_goal_function2
   # v2: p=25, n=20, M=5, number_of_iterations=500, beta_number=20 -> 42 minutes -> 
   # v3: p=25, n=20, M=5, number_of_iterations=1000, beta_number=25 -> 84 minutes -> Malo czasu mial logloglog, zeby sie rozkrecic.
   # v4: p=25, n=20, M=5, number_of_iterations=1000, beta_number=50 -> 170 minutes -> Niebieski zwolnil, ale rozowy pnie sie w gore
@@ -167,18 +172,23 @@ list_of_lists_of_log_values_betas <- get_list_of_lists_of_log_values(example_goa
 # Rozne krzywe odpowiadaja roznym betom.
 
 #save(list_of_lists_of_log_values_betas, file="data/list_of_lists_of_log_values_betas_v?.RData") # UWAGA! nie nadpisac!
-#load("data/list_of_lists_of_log_values_betas_v2.RData")
+#load("data/list_of_lists_of_log_values_betas_v4.RData")
 
-plot_epdf(values_list = list_of_lists_of_log_values_betas,
+plot_ecdf(values_list = list_of_lists_of_log_values_betas,
           min_val = example_goal_function2(permutations::id),
           max_val = example_goal_function2(actual_permutation),
           max_y_scale = 1,
-          legend_text = c("b_n = 1", "b_n = n", "b_n = log(n+1)",
-                          #"b_n = sqrt(log(n+1))",
+          legend_text = c("b_n = 1",
+                          "b_n = n",
+                          "b_n = log(n+1)",
+                          #"b_n = sqrt(log(n+1))", # v1 i v2 mają, v3 i v4 nie
                           "b_n = log(log(n+2))",
                           "b_n = log(log(log(n+15)))",
-                          "b_n = log(log(log(n+30)))"),
-          my_title = paste0("EPDF plot - mean of ", M, " runs"))
+                          "b_n = log(log(log(n+45)))"),
+          my_title = paste0("Wykres ECDF - średnia z ", M, " eksperymentów"),
+          my_ylab = "jakość znalezionego rozwiązania",
+          my_xlab = "log10 liczby wywołań funkcji celu",
+          my_sub = "dla różnych wartości parametrów")
 
 # log(log(n)) oraz log(log(log(n))) radzą sobie podobnie i zdecydowanie lepiej od innych.
 
@@ -198,13 +208,17 @@ list_of_lists_of_log_values_num_iters <- get_list_of_lists_of_log_values(example
                                                                          p, beta3,
                                                                          number_of_iterations, M)
 #save(list_of_lists_of_log_values_num_iters, file="data/list_of_lists_of_log_values_num_iters_v?.RData")
-#load("data/list_of_lists_of_log_values_num_iters_v?.RData")
+#load("data/list_of_lists_of_log_values_num_iters_v1.RData")
 
-plot_epdf(values_list = list_of_lists_of_log_values_num_iters,
-          min_val = example_goal_function2(permutations::id),
-          max_val = example_goal_function2(actual_permutation), # TODO dlaczego tu bylo wpisane 100?
+plot_ecdf(values_list = list_of_lists_of_log_values_num_iters,
+          min_val = -24,
+          max_val = 45,
           max_y_scale = 1,
-          legend_text = paste0("number_of_iterations = ", number_of_iterations))
+          legend_text = paste0("długość MH w jednej iteracji = ", number_of_iterations),
+          my_title = paste0("Wykres ECDF - średnia z 30 eksperymentów"),
+          my_ylab = "jakość znalezionego rozwiązania",
+          my_xlab = "log10 liczby wywołań funkcji celu",
+          my_sub = "dla różnych wartości parametrów")
 
 # 1280 iteracji przynosi już niewielki zysk ponad 640.
 
@@ -271,7 +285,7 @@ for(i in 1:liczba_powtorzen) {
 }
 
 #save(ma_results, SA_log_log_results, file="data/porownanie_log_log_MH_v?.RData")
-#load("data/porownanie_log_log_MH_v?.RData")
+#load("data/porownanie_log_log_MH_v1.RData")
 
 P_mh <- ecdf(ma_results)
 plot(P_mh, col="red")

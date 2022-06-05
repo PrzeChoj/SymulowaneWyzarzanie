@@ -121,7 +121,7 @@ plot_eigen <- data.frame("eigen_U" = v$eigen_U,
   ggplot(aes(x=matrix_type, y=eigen_value, fill=matrix_type)) + 
   geom_violin() +
   geom_hline(yintercept = 1, linetype="dashed", color = "red") +
-  labs(title="Rozkład wartości własnych estymatora macierzy Covariancji",
+  labs(title="Rozkład wartości własnych estymatora macierzy kowariancji",
        subtitle = paste0("na podstawie próbki wielkosci n=", n,
                          " z rozkładu normalnego N(0, I) wymiaru p=", p),
        x = "Metoda poprawiania estymatora", y = "Wartości własne") +
@@ -157,7 +157,7 @@ plot_frob_est <- data.frame("frob_norm_est" = v$frob_norm_est,
   geom_hline(yintercept = 0,
              linetype = "dashed", color = "red") +
   geom_boxplot(width=0.1, fill='#FFFFFF') +
-  labs(title="Norma Frobeniusa błędu estymatora macierzy Covariancji",
+  labs(title="Norma Frobeniusa błędu estymatora macierzy kowariancji",
        subtitle = paste0("na podstawie próbki wielkosci n=", n,
                          " z rozkładu normalnego N(0, I) wymiaru p=", p),
        x = "Metoda poprawiania estymatora",
@@ -180,16 +180,17 @@ plot_frob_est
 wilcox.test(v$frob_norm_est, v$frob_norm_est_bg)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
 wilcox.test(v$frob_norm_est, v$frob_norm_est_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
 wilcox.test(v$frob_norm_est_bg, v$frob_norm_est_mh) # p_val: v1 0.01101;      v2 2.5*10^(-6) <<<--- inne mediany; MH leprzy
+t.test(v$frob_norm_est_bg, v$frob_norm_est_mh)      # p_val: v1 0.00839;      v2 2*10^(-6)   <<<--- inne średnie; MH leprzy
 
 
-plot_EPDF_opt <- data.frame(BG = v$f_val_bg,
+plot_ECDF_opt <- data.frame(BG = v$f_val_bg,
                             MH = v$f_val_mh) %>% 
   pivot_longer(cols = c("BG", "MH"),
                names_to = "alg_type",
                values_to = "found_max") %>% 
   ggplot(aes(found_max, col=alg_type)) +
   stat_ecdf(geom = "step", size=2) +
-  labs(title="EPDF rokładu znalezionej największej wartości",
+  labs(title="ECDF rokładu znalezionej największej wartości",
        subtitle = paste0("na podstawie próbki wielkosci n=", n,
                          " z rozkładu normalnego N(0, I) wymiaru p=", p),
        x = "Logarytm znalezionej wartości funkcji wiarogodności",
@@ -204,10 +205,10 @@ plot_EPDF_opt <- data.frame(BG = v$f_val_bg,
     axis.text.y = element_text(face="bold", size=14),
     legend.text = element_text(face="bold", size=14)
   )
-plot_EPDF_opt
-#ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_EPDF_opt_", plot_experiment, ".png"), plot_EPDF_opt, width = 10, height = 6)
+plot_ECDF_opt
+#ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_ECDF_opt_", plot_experiment, ".png"), plot_ECDF_opt, width = 10, height = 6)
 
 wilcox.test(v$f_val_bg, v$f_val_mh) # p_val: v1 0.97; v2 0.49 <<<--- niema powodu podejrzewac, ze mediany log funkcji wiarogodnosci sa inne
+t.test(v$f_val_bg, v$f_val_mh)      # p_val: v1 0.89; v2 0.49 <<<--- niema powodu podejrzewac, ze średnie log funkcji wiarogodnosci sa inne
 ks.test(v$f_val_bg, v$f_val_mh)     # p_val: v1 1   ; v2 0.55 <<<--- niema powodu podejrzewac, ze rozklady log funkcji wiarogodnosci sa inne
-
 
