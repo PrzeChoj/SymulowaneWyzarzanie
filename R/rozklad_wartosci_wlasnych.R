@@ -77,26 +77,62 @@ get_values <- function(p, n, sigma_matrix, M){
   )
 }
 
-# TODO list (jak bedzie czas):
-  # 1. v3: inna macierz sigma_matrix
-  # 2. v4: p = 100
-
 set.seed(1234)
 
 #v1 <- get_values(p=10, n=20, sigma_matrix=diag(10), M=100) # MiNI 10 minut
 #save(v1, file="data/eigen_v1.RData") # UWAGA! nie nadpisac!
-#load("data/eigen_v1.RData")
 
 #v2 <- get_values(p=25, n=20, sigma_matrix=diag(25), M=50) # MiNI 90 minut
 #save(v2, file="data/eigen_v2.RData") # UWAGA! nie nadpisac!
-#load("data/eigen_v2.RData")
 
 
+#p_v3 <- 10
+#n_v3 <- 20
+#sigma_matrix_v3 <- matrix(numeric(p_v3*p_v3), nrow=p_v3)
+#for(i in 1:p_v3){
+#  for(j in 1:p_v3){
+#    sigma_matrix_v3[i,j] <- 1 - min(abs(i-j), p_v3-abs(i-j)) / p_v3
+#  }
+#  sigma_matrix_v3[i,i] <- 1 + 1/p_v3
+#}
+#heatmap(sigma_matrix_v3, Colv = NA, Rowv = NA)
+#v3 <- get_values(p=p_v3, n=n_v3, sigma_matrix=sigma_matrix_v3, M=200) # PC 10.5 minut ?
+#save(v3, file="data/eigen_v3.RData") # UWAGA! nie nadpisac!
+
+
+#p_half_v4 <- 5
+#p_v4 <- p_half_v4 * 2
+#n_v4 <- 20
+#sigma_matrix_v4 <- matrix(numeric(p_v4*p_v4), nrow=p_v4)
+#for(i in 1:p_half_v4){
+#  for(j in 1:p_half_v4){
+#    sigma_matrix_v4[i,j] <- 1 - min(abs(i-j), p_half_v4-abs(i-j)) / p_v4
+#    sigma_matrix_v4[i+p_half_v4,j+p_half_v4] <- 1 - min(abs(i-j), p_half_v4-abs(i-j)) / p_v4
+#    
+#    sigma_matrix_v4[i,j+p_half_v4] <- 1 - min(abs(i-j), p_half_v4-abs(i-j)) / p_v4 / 1.5
+#    sigma_matrix_v4[i+p_half_v4,j] <- 1 - min(abs(i-j), p_half_v4-abs(i-j)) / p_v4 / 1.5
+#  }
+#  sigma_matrix_v4[i,i] <- 1 + 4/p_v4
+#  sigma_matrix_v4[i+p_half_v4,i+p_half_v4] <- 1 + 2/p_v4
+#}
+#heatmap(sigma_matrix_v4, Colv = NA, Rowv = NA) # invariant względem (1,2,3,4,5)(6,7,8,9,10)
+#v4 <- get_values(p=p_v4, n=n_v4, sigma_matrix=sigma_matrix_v4, M=200) # PC 12 minut
+#save(v4, file="data/eigen_v4.RData") # UWAGA! nie nadpisac!
+
+
+
+
+
+
+load("data/eigen_v1.RData")
+load("data/eigen_v2.RData")
+load("data/eigen_v3.RData")
+load("data/eigen_v4.RData")
 
 # NOTE: W wilcox.test: H_0 = (mediany rozkladow sa takie same); H_1 = (mediany rozkladow sa inne)
 # NOTE: dla sigma_matrix = diag(p), plot_frob_est bedzie przesunietym plot_frob, bo od kazdego odejmujemy troche.Interpretacja jest jednak troche inna
 
-plot_experiment <- "v1" # narazie jest v1 i v2 i raczej tak zostanie xd
+plot_experiment <- "v3" # narazie jest v1 i v2 i raczej tak zostanie xd
 
 if(plot_experiment == "v1"){
   v <- v1
@@ -105,6 +141,14 @@ if(plot_experiment == "v1"){
 }else if(plot_experiment == "v2"){
   v <- v2
   p <- 25
+  n <- 20
+}else if(plot_experiment == "v3"){
+  v <- v3
+  p <- 10
+  n <- 20
+}else if(plot_experiment == "v4"){
+  v <- v4
+  p <- 10
   n <- 20
 }else{
   print(paste0("Zla wartosc plot_experiment = ", plot_experiment))
@@ -178,7 +222,9 @@ plot_frob_est
 #ggsave(paste0("./plots/rozklad_wartosci_wlasnych/plot_frob_est_", plot_experiment, ".png"), plot_frob_est, width = 10, height = 6)
 
 wilcox.test(v$frob_norm_est, v$frob_norm_est_bg)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
+t.test(v$frob_norm_est, v$frob_norm_est_bg)
 wilcox.test(v$frob_norm_est, v$frob_norm_est_mh)    # p_val: v1 2.2*10^(-16); v2 2.2*10^(-16)
+t.test(v$frob_norm_est, v$frob_norm_est_mh)
 wilcox.test(v$frob_norm_est_bg, v$frob_norm_est_mh) # p_val: v1 0.01101;      v2 2.5*10^(-6) <<<--- inne mediany; MH leprzy
 t.test(v$frob_norm_est_bg, v$frob_norm_est_mh)      # p_val: v1 0.00839;      v2 2*10^(-6)   <<<--- inne średnie; MH leprzy
 
