@@ -121,7 +121,25 @@ set.seed(1234)
 
 
 
+# TODO:
+  # v5 - ciekawe; prawie zawsze znajduje podzial {1,2,3,4,5}, {6,7,8,9,10}
 
+#p_half_v5 <- 5
+#p_v5 <- p_half_v5 * 2
+#n_v5 <- 20
+#sigma_matrix_v5 <- matrix(numeric(p_v5*p_v5), nrow=p_v5)
+#for(i in 1:p_half_v5){
+#  for(j in 1:p_half_v5){
+#    sigma_matrix_v5[i,j] <- 1 - min(abs(i-j), p_half_v5-abs(i-j)) / p_v5
+#    sigma_matrix_v5[i+p_half_v5,j+p_half_v5] <- 1 - min(abs(i-j), p_half_v5-abs(i-j)) / p_v5
+#    
+#    sigma_matrix_v5[i,j+p_half_v5] <- - (1 - min(abs(i-j), p_half_v5-abs(i-j)) / p_v5 / 1.5)
+#    sigma_matrix_v5[i+p_half_v5,j] <- - (1 - min(abs(i-j), p_half_v5-abs(i-j)) / p_v5 / 1.5)
+#  }
+#  sigma_matrix_v5[i,i] <- 1 + 4/p_v5
+#  sigma_matrix_v5[i+p_half_v5,i+p_half_v5] <- 1 + 2/p_v5
+#}
+#heatmap(sigma_matrix_v5, Colv = NA, Rowv = NA) # invariant względem (1,2,3,4,5)(6,7,8,9,10)
 
 
 load("data/eigen_v1.RData")
